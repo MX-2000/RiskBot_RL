@@ -1,0 +1,4 @@
+venv_johnny/*
+venv_tf/*
+*.png
+*.keras

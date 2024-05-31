@@ -5,8 +5,7 @@ class Player:
     def __init__(self, name, is_bot) -> None:
         self.name = name
         self.is_bot = is_bot
-        self.tot_troops = 0
-        self.controlled_territories = []
+        self.controlled_territories: list[Territory] = []
         self.cards = None
 
     def assign_territory(self, territory: Territory):
@@ -15,3 +14,9 @@ class Player:
         """
         self.controlled_territories.append(territory)
         territory.assign_to_player(self.name)
+
+    def get_total_troops(self):
+        result = 0
+        for t in self.controlled_territories:
+            result += t.troops
+        return result

@@ -5,8 +5,9 @@ class Territory:
         self.troops = 0
         self.occupying_player_name = None
 
-    def update_troops(self, new_troops):
-        pass
+    def set_troops(self, num_troops):
+        self.troops = num_troops
+        return self.troops
 
     def assign_to_player(self, name):
         self.occupying_player_name = name

@@ -37,6 +37,11 @@ class Game:
                 print(
                     f"{t.name}: owned by {t.occupying_player_name}: Troops {t.troops}"
                 )
+        print("--------------------------")
+        for player in self.players:
+            print(
+                f"{player.name} - Territories: {len(player.controlled_territories)} - Troops: {player.get_total_troops()}"
+            )
         return
 
     def load_map(self, map_name):
@@ -107,6 +112,9 @@ class Game:
             unassigned_territories = self.game_map.get_unassigned_territories()
             t = random.choice(unassigned_territories)
             self.players[i].assign_territory(t)
+
+            # Assign 1 troop
+            t.set_troops(1)
 
             # We loop over the players until it's over
             i += 1

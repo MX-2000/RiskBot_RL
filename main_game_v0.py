@@ -63,9 +63,15 @@ def main():
         return
 
     players = []
+    name_set = set()
     for i, player in enumerate(players_args):
         p = Player(player["name"], is_bot=player["is_bot"])
         players.append(p)
+        name_set.add(player["name"])
+
+    if len(players) > 6 or len(name_set) != len(players):
+        print(f"Maximum 6 players and 2 players can't have same name.")
+        return
 
     game = Game(map_name, players=players)
     game.play()

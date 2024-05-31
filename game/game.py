@@ -1,6 +1,6 @@
 import os
 import json
-import sys
+import random
 
 from game.player import Player
 from game.map import Map
@@ -21,12 +21,10 @@ class Game:
         self.players = players
         self.map_name = map_name
         self.deck = None
-        self.map = None
-        self.rules = None
-        self.players = None
+        self.fixed = fixed
+        self.true_random = true_random
 
-        metadata = self.load_map(map_name)
-        print(metadata)
+        self.game_map = self.load_map(map_name)
 
     def render(self):
         """
@@ -51,15 +49,18 @@ class Game:
         territories = []
 
         for name, t_data in map_metadata["territories"].items():
-            territory = Territory()
+            territory = Territory(name, t_data["adjacent_territories_ids"])
             territories.append(territory)
 
         for name, c_data in map_metadata["continents"].items():
-            continent = Continent()
+            continent = Continent(
+                name, c_data["territories"], troops_reward=c_data["troops_reward"]
+            )
             continents.append(continent)
 
-        game_map = Map()
-        return map_metadata
+        game_map = Map(map_name, territories, continents)
+
+        return game_map
 
     def create(self, players, map, rules):
         """
@@ -71,4 +72,18 @@ class Game:
         """
         Start game loop
         """
+        self.init_players()
         pass
+
+    def init_players(self):
+        """
+        Based on the map & the player number:
+            - shuffle the order
+            - attribute a starting troop number to each player
+            - randomly assigns territories to each player
+            - randomly assigns the starting troop to each territory
+        """
+        random.shuffle(self.players)
+
+        starting_troops = 40 - (len(self.players) - 2) * 5
+        print(starting_troops)

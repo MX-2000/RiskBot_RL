@@ -68,6 +68,7 @@ def main():
         players.append(p)
 
     game = Game(map_name, players=players)
+    game.play()
 
 
 if __name__ == "__main__":

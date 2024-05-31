@@ -1,0 +1,55 @@
+{
+    "name": "test_v0",
+    "territory_number": 4,
+    "continent_nb": 2,
+    "continents": {
+        "small_continent": {
+            "name": "small_continent",
+            "territories": [
+                "territory_1"
+            ],
+            "troops_reward": 1
+        },
+        "medium_continent": {
+            "name": "medium_continent",
+            "territories": [
+                "territory_2",
+                "territory_3",
+                "territory_4"
+            ],
+            "troops_reward": 3
+        }
+    },
+    "territories": {
+        "territory_1": {
+            "name": "territory_1",
+            "adjacent_territories": [
+                "territory_2",
+                "territory_3"
+            ]
+        },
+        "territory_2": {
+            "name": "territory_2",
+            "adjacent_territories": [
+                "territory_3",
+                "territory_4",
+                "territory_1"
+            ]
+        },
+        "territory_3": {
+            "name": "territory_3",
+            "adjacent_territories": [
+                "territory_3",
+                "territory_4",
+                "territory_1"
+            ]
+        },
+        "territory_4": {
+            "name": "territory_4",
+            "adjacent_territories": [
+                "territory_2",
+                "territory_3"
+            ]
+        }
+    }
+}

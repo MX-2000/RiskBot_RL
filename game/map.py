@@ -9,3 +9,10 @@ class Map:
         self.name = name
         self.territories = territories
         self.continents = continents
+
+    def get_unassigned_territories(self):
+        """
+        return the list of unassigned territories.
+        Used in game setup phase.
+        """
+        return [t for t in self.territories if t.occupying_player_id is None]

@@ -3,10 +3,10 @@ class Territory:
         self.name = name
         self.adjacent_territories_ids = adjacent_territories_ids
         self.troops = 0
-        self.occupying_player_id = None
+        self.occupying_player_name = None
 
     def update_troops(self, new_troops):
         pass
 
-    def update_controlling_player(self, id):
-        pass
+    def assign_to_player(self, name):
+        self.occupying_player_name = name

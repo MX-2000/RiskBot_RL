@@ -91,4 +91,16 @@ class Game:
         random.shuffle(self.players)
 
         starting_troops = 40 - (len(self.players) - 2) * 5
-        print(starting_troops)
+
+        # Each player gets their territories
+        unassigned_territories = self.game_map.territories
+        i = 0
+        while len(unassigned_territories) > 0:
+            unassigned_territories = self.game_map.get_unassigned_territories()
+            t = random.choice(unassigned_territories)
+            self.players[i].assign_territory(t)
+
+            # We loop over the players until it's over
+            i += 1
+            if i == len(self.players):
+                i = 0

@@ -45,6 +45,11 @@ class Game:
         with open(path, "r") as map_file:
             map_metadata = json.loads(map_file.read())
 
+        if len(self.players) > map_metadata["max_players"]:
+            raise ValueError(
+                f"Maximum number of players for this map is {map_metadata['max_players']}"
+            )
+
         continents = []
         territories = []
 
@@ -80,8 +85,8 @@ class Game:
         Based on the map & the player number:
             - shuffle the order
             - attribute a starting troop number to each player
-            - randomly assigns territories to each player
-            - randomly assigns the starting troop to each territory
+            - randomly assigns territories to each player with 1 troop
+            - randomly assigns the remaining troops to each territory
         """
         random.shuffle(self.players)
 

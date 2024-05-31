@@ -1,6 +1,7 @@
 {
     "name": "test_map_v0",
     "territory_number": 4,
+    "max_players": 2,
     "continent_nb": 2,
     "continents": {
         "small_continent": {

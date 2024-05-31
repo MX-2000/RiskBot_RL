@@ -34,9 +34,7 @@ class Game:
         for continent in self.game_map.continents:
             for t_name in continent.territories:
                 t = self.game_map.get_territory_from_name(t_name)
-                print(
-                    f"{t.name}: owned by {t.occupying_player_name}: Troops {t.troops}"
-                )
+                print(f"{t.name} - O: {t.occupying_player_name} - Troops: {t.troops}")
         print("--------------------------")
         for player in self.players:
             print(
@@ -120,3 +118,13 @@ class Game:
             i += 1
             if i == len(self.players):
                 i = 0
+
+        # Assign remaining troops randomly
+        for player in self.players:
+            p_remaining_troops = starting_troops - len(
+                player.controlled_territories
+            )  # We already put 1 troop on each
+            while p_remaining_troops > 0:
+                t = random.choice(player.controlled_territories)
+                t.add_troops(1)
+                p_remaining_troops -= 1

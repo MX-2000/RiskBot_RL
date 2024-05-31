@@ -9,5 +9,9 @@ class Territory:
         self.troops = num_troops
         return self.troops
 
+    def add_troops(self, num_troops):
+        self.troops += num_troops
+        return self.troops
+
     def assign_to_player(self, name):
         self.occupying_player_name = name

@@ -30,6 +30,7 @@ class Game:
         """
         Render game state on screen
         """
+        print(self.map_repr)
         for continent in self.game_map.continents:
             for t_name in continent.territories:
                 t = self.game_map.get_territory_from_name(t_name)
@@ -70,7 +71,7 @@ class Game:
             continents.append(continent)
 
         game_map = Map(map_name, territories, continents)
-
+        self.map_repr = map_metadata["repr"]
         return game_map
 
     def create(self, players, map, rules):

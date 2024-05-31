@@ -30,7 +30,13 @@ class Game:
         """
         Render game state on screen
         """
-        pass
+        for continent in self.game_map.continents:
+            for t_name in continent.territories:
+                t = self.game_map.get_territory_from_name(t_name)
+                print(
+                    f"{t.name}: owned by {t.occupying_player_name}: Troops {t.troops}"
+                )
+        return
 
     def load_map(self, map_name):
         """
@@ -78,6 +84,7 @@ class Game:
         Start game loop
         """
         self.init_players()
+        self.render()
         pass
 
     def init_players(self):
@@ -95,7 +102,7 @@ class Game:
         # Each player gets their territories
         unassigned_territories = self.game_map.territories
         i = 0
-        while len(unassigned_territories) > 0:
+        while len(unassigned_territories) > 1:
             unassigned_territories = self.game_map.get_unassigned_territories()
             t = random.choice(unassigned_territories)
             self.players[i].assign_territory(t)

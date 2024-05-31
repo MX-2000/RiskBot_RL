@@ -4,3 +4,4 @@ venv_tf/*
 *.keras
 
 */__pycache__/*
+game/maps/dum_map_repr_to_json.py

@@ -15,4 +15,10 @@ class Map:
         return the list of unassigned territories.
         Used in game setup phase.
         """
-        return [t for t in self.territories if t.occupying_player_id is None]
+        return [t for t in self.territories if t.occupying_player_name is None]
+
+    def get_territory_from_name(self, name):
+        """
+        Returns the territory object
+        """
+        return [t for t in self.territories if t.name == name][0]

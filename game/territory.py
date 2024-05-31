@@ -1,9 +1,9 @@
 class Territory:
-    def __init__(self) -> None:
-        self.name = ""
+    def __init__(self, name, adjacent_territories) -> None:
+        self.name = name
+        self.adjacent_territories = adjacent_territories
         self.troops = 0
         self.occupying_player_id = None
-        self.adjacent_territories = None
 
     def update_troops(self, new_troops):
         pass

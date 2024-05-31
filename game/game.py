@@ -3,6 +3,9 @@ import json
 import sys
 
 from game.player import Player
+from game.map import Map
+from game.territory import Territory
+from game.continent import Continent
 
 
 class Game:
@@ -44,6 +47,18 @@ class Game:
         with open(path, "r") as map_file:
             map_metadata = json.loads(map_file.read())
 
+        continents = []
+        territories = []
+
+        for name, t_data in map_metadata["territories"].items():
+            territory = Territory()
+            territories.append(territory)
+
+        for name, c_data in map_metadata["continents"].items():
+            continent = Continent()
+            continents.append(continent)
+
+        game_map = Map()
         return map_metadata
 
     def create(self, players, map, rules):

@@ -11,5 +11,4 @@ class Continent:
         self.troops_rewards = troops_reward
 
     def is_controlled_by(self, player: Player):
-        # return all(c.occupying_player_name == player.name for c in self.territories)
-        return False  # TODO
+        return all(t.occupying_player_name == player.name for t in self.territories)

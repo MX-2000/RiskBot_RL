@@ -3,10 +3,13 @@ import os
 import json
 import random
 
+from loguru import logger
+
 from game.player import Player
 from game.map import Map
 from game.territory import Territory
 from game.continent import Continent
+from game.utils import wait_for_cmd_action
 
 PAUSE_BTW_ACTIONS = 5
 
@@ -43,6 +46,7 @@ class Game:
             print(
                 f"{player.name} - Territories: {len(player.controlled_territories)} - Troops: {player.get_total_troops()}"
             )
+        print("**************************************\n\n")
         return
 
     def load_map(self, map_name):
@@ -110,18 +114,27 @@ class Game:
                 time.sleep(PAUSE_BTW_ACTIONS)
             else:
                 # TODO prompt
-                pass
+                raise NotImplementedError(
+                    f"{player.name} is human, Not Implemented for now."
+                )
 
-    def get_deployment_troops(self, player: Player, set=0):
+    def get_deployment_troops(self, player: Player, card_troops=0):
         """
         Computes the number of troops available for deployment at the start of a player's turn. Sum of:
             1. min(Controlles territories // 3,3)
             2. cards sets
             3. Continents
         """
-        result = set
-        result += min(3, len(player.controlled_territories) // 3)
-        # TODO continents holds
+
+        territory_count = max(3, len(player.controlled_territories) // 3)
+        continent_count = 0
+        for continent in self.game_map.continents:
+            if continent.is_controlled_by(player):
+                continent_count += continent.troops_rewards
+        result = card_troops + territory_count + continent_count
+        logger.debug(
+            f"{player.name} got {result} troops to deploy. {card_troops} from cards. {territory_count} from territories. {continent_count} from continents."
+        )
         return result
 
     def attack_phase(self, player):
@@ -140,7 +153,7 @@ class Game:
         """
         self.init_players()
         self.render()
-        return
+
         remaining_players = self.players
 
         while len(remaining_players) > 1:
@@ -150,9 +163,10 @@ class Game:
                 if player.is_dead:
                     continue
 
+                wait_for_cmd_action()
                 self.draft_phase(player)
                 self.render()
-                time.sleep(PAUSE_BTW_ACTIONS)
+                wait_for_cmd_action()
                 # self.attack_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)
                 # self.reinforce_phase(player)

@@ -1,5 +1,6 @@
 venv_johnny/*
 venv_tf/*
+venv_*/*
 *.png
 *.keras
 

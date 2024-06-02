@@ -1,3 +1,4 @@
+import time
 import os
 import json
 import random
@@ -6,6 +7,8 @@ from game.player import Player
 from game.map import Map
 from game.territory import Territory
 from game.continent import Continent
+
+PAUSE_BTW_ACTIONS = 5
 
 
 class Game:
@@ -77,11 +80,42 @@ class Game:
         self.map_repr = map_metadata["repr"]
         return game_map
 
-    def draft_phase(self, player):
+    def draft_phase(self, player: Player):
         """
         Go through the drafting phase for a player
+            1. Cards sets
+            2. Deploy troops on territories
         """
-        pass
+
+        # TODO CARD system
+
+        troops_to_deploy = self.get_deployment_troops(player)
+
+        while troops_to_deploy > 0:
+
+            if player.is_bot:
+                # Doing random for now
+                deploying = random.randint(1, troops_to_deploy)
+                territory = random.choice(player.controlled_territories)
+                territory.add_troops(deploying)
+                troops_to_deploy -= deploying
+                print(f"{player.name} deployed {deploying} troops in {territory.name}")
+                time.sleep(PAUSE_BTW_ACTIONS)
+            else:
+                # TODO prompt
+                pass
+
+    def get_deployment_troops(self, player: Player, set=0):
+        """
+        Computes the number of troops available for deployment at the start of a player's turn. Sum of:
+            1. min(Controlles territories // 3,3)
+            2. cards sets
+            3. Continents
+        """
+        result = set
+        result += min(3, len(player.controlled_territories) // 3)
+        # TODO continents holds
+        return result
 
     def attack_phase(self, player):
         """"""
@@ -110,13 +144,22 @@ class Game:
                     continue
 
                 self.draft_phase(player)
-                self.attack_phase(player)
-                self.reinforce_phase(player)
-                self.card_phase(player)
+                self.render()
+                time.sleep(PAUSE_BTW_ACTIONS)
+                # self.attack_phase(player)
+                # time.sleep(PAUSE_BTW_ACTIONS)
+                # self.reinforce_phase(player)
+                # time.sleep(PAUSE_BTW_ACTIONS)
+                # self.card_phase(player)
+                # time.sleep(PAUSE_BTW_ACTIONS)
+                # self.render()
+                # time.sleep(PAUSE_BTW_ACTIONS)
 
             remaining_players = [
                 player for player in self.players if not player.is_dead
             ]
+
+        print(f"Player: {remaining_players[0].name} Won!!")
 
     def init_players(self):
         """

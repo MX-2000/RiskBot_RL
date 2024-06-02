@@ -12,7 +12,7 @@ from game.continent import Continent
 from game.utils import wait_for_cmd_action
 from game.dice_rolls import roll_dices, roll_dices_sanity_checks
 
-PAUSE_BTW_ACTIONS = 5
+PAUSE_BTW_ACTIONS = 2
 
 
 class Game:
@@ -31,6 +31,7 @@ class Game:
         self.fixed = fixed
         self.true_random = true_random
         self.turn_number = 1
+        self.game_phase = None
 
         self.game_map = self.load_map(map_name)
 
@@ -39,7 +40,7 @@ class Game:
         Render game state on screen
         """
         print(self.map_repr)
-        print(f"\nTurn: {self.turn_number}\n")
+        print(f"\nTurn: {self.turn_number}\nPhase:{self.game_phase}\n")
         for continent in self.game_map.continents:
             for t in continent.territories:
                 # t = self.game_map.get_territory_from_name(t_name)
@@ -100,6 +101,7 @@ class Game:
             1. Cards sets
             2. Deploy troops on territories
         """
+        self.game_phase = "DRAFT"
 
         # TODO CARD system
 
@@ -145,6 +147,8 @@ class Game:
         For bot so far: choose randomly 1 territory to attack another
         The sanity checks are out of the random choice, for later implementation
         """
+        self.game_phase = "ATTACK"
+
         if player.is_bot:
 
             # TODO
@@ -156,21 +160,91 @@ class Game:
             is_valid = False
             while not is_valid:
 
+                # Random pick amongst own player territories
                 attacker = random.choice(player.controlled_territories)
-                target = random.choice(self.game_map.territories)
+                adjacent_territories = [
+                    self.game_map.get_territory_from_name(t)
+                    for t in attacker.adjacent_territories_ids
+                ]
+                # Target randomly an adjacent territory that isn't our own
+                try:
+                    target = random.choice(
+                        [
+                            t
+                            for t in adjacent_territories
+                            if t.occupying_player_name != player.name
+                        ]
+                    )
+                except IndexError:
+                    # all adjacent territories are player's
+                    continue
+
                 attack_dice_nb = random.randint(1, min(3, attacker.troops))
                 is_valid = roll_dices_sanity_checks(
                     player, attacker, target, attack_dice_nb
                 )
+                logger.debug(
+                    f"{player.name} trying to attack from {attacker.name} to {target.name} with {attack_dice_nb} troops."
+                )
+                time.sleep(PAUSE_BTW_ACTIONS)
 
             if is_valid:
-                attacker_loss, defender_loss = roll_dices(
-                    player, attacker, target, attack_dice_nb, self.true_random
-                )
-                # TODO: remove corresponding troops number
+                logger.debug(f"Last attack setting was valid.")
+
+                defender_remaining = target.troops
+                # We roll until attacker or defender is exhausted
+                # TODO: udpate attacking dice as troop number reduce under 3 or 2 for attack/defender
+                while defender_remaining > 0 and roll_dices_sanity_checks(
+                    player, attacker, target, attack_dice_nb
+                ):
+
+                    attacker_loss, defender_loss = roll_dices(
+                        player, attacker, target, attack_dice_nb, self.true_random
+                    )
+                    logger.debug(
+                        f"Attacker lost {attacker_loss}, Defender lost {defender_loss}"
+                    )
+                    attack_remaining = attacker.remove_troops(attacker_loss)
+                    defender_remaining = target.remove_troops(defender_loss)
+                    logger.debug(
+                        f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
+                    )
+                    time.sleep(PAUSE_BTW_ACTIONS)
+
+                if defender_remaining == 0:
+                    logger.debug(
+                        f"Territory got conquered, transferring troops and ownership"
+                    )
+                    # Update ownership
+                    target_player = self.get_player_by_name(
+                        target.occupying_player_name
+                    )
+                    target_player.remove_territory(target)
+                    player.assign_territory(target)
+
+                    # Move attaker troops
+                    # We move a minimum of (remaining_troops -1, attack_dice_nb)
+                    min_to_move = min(attack_dice_nb, attack_remaining - 1)
+                    max_to_move = attack_remaining - 1
+
+                    # For now we move the maximum we can
+                    mooving = max_to_move
+                    attacker.remove_troops(mooving)
+                    target.add_troops(mooving)
+
+                    # If we killed the target
+                    if len(target_player.controlled_territories) == 0:
+                        target_player.is_dead = True
+
+                        # TODO transfer cards, maybe somewhere else. I can see redudancy here with human as well, need refactor.
 
         else:
             raise NotImplementedError("Only bot players for now")
+
+    def get_player_by_name(self, player_name):
+        result = [p for p in self.players if p.name == player_name]
+        assert len(result) == 1
+        return result[0]
 
     def has_valid_attack(self, player):
         """
@@ -180,6 +254,8 @@ class Game:
         return True
 
     def reinforce_phase(self, player):
+        self.game_phase = "FORTIFY"
+
         pass
 
     def card_phase(self, player):
@@ -205,8 +281,8 @@ class Game:
                 self.draft_phase(player)
                 self.render()
                 wait_for_cmd_action()
-                # self.attack_phase(player)
-                # time.sleep(PAUSE_BTW_ACTIONS)
+                self.attack_phase(player)
+                self.render()
                 # self.reinforce_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)
                 # self.card_phase(player)

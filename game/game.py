@@ -29,6 +29,7 @@ class Game:
         self.deck = None
         self.fixed = fixed
         self.true_random = true_random
+        self.turn_number = 1
 
         self.game_map = self.load_map(map_name)
 
@@ -37,6 +38,7 @@ class Game:
         Render game state on screen
         """
         print(self.map_repr)
+        print(f"\nTurn: {self.turn_number}\n")
         for continent in self.game_map.continents:
             for t in continent.territories:
                 # t = self.game_map.get_territory_from_name(t_name)
@@ -46,7 +48,7 @@ class Game:
             print(
                 f"{player.name} - Territories: {len(player.controlled_territories)} - Troops: {player.get_total_troops()}"
             )
-        print("**************************************\n\n")
+        print("\n**************************************\n\n")
         return
 
     def load_map(self, map_name):
@@ -179,6 +181,7 @@ class Game:
             remaining_players = [
                 player for player in self.players if not player.is_dead
             ]
+            self.turn_number += 1
 
         print(f"Player: {remaining_players[0].name} Won!!")
 

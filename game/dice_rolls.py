@@ -26,6 +26,8 @@ def roll_dices_sanity_checks(
         return False
     if attacker_territory.troops < 2:
         return False
+    if attacker_territory.troops < 1 + attack_dice_nb:
+        return False
 
     return True
 

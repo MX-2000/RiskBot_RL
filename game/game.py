@@ -158,12 +158,12 @@ class Game:
                 attacker = random.choice(player.controlled_territories)
                 target = random.choice(self.game_map.territories)
                 attack_dice_nb = random.randint(1, min(3, attacker.troops))
-                is_valid = self.roll_dice_sanity_checks(
+                is_valid = self.roll_dices_sanity_checks(
                     player, attacker, target, attack_dice_nb
                 )
 
             if is_valid:
-                attacker_loss, defender_loss = self.roll_dice(
+                attacker_loss, defender_loss = self.roll_dices(
                     player, attacker, target, attack_dice_nb
                 )
                 # TODO: remove corresponding troops number
@@ -178,7 +178,7 @@ class Game:
         # TODO
         return True
 
-    def roll_dice_sanity_checks(
+    def roll_dices_sanity_checks(
         self,
         attack_player: Player,
         attacker_territory: Territory,
@@ -204,13 +204,16 @@ class Game:
 
         return True
 
-    def roll_dice(self, attack_player, attacker_territory, target, attack_dice_nb):
+    def roll_dices(
+        self,
+        attack_player: Player,
+        attacker_territory: Territory,
+        target: Territory,
+        attack_dice_nb: int,
+    ):
         """
         Returns tuple: [attacker_loss, defender_loss]
         """
-        if self.true_random:
-            pass
-
         """
         2. Dice rolls: 
             . On assigne à chaque dès attack. un nombre aléatoire entre 1 et 6 (entre 1 et 3 dés)
@@ -220,7 +223,29 @@ class Game:
             . For each pair of dice, add loosing troop
             . Return loosing troops
         """
-        return (0, 0)
+        if self.true_random:
+
+            attack_loss = 0
+            defender_loss = 0
+
+            attack_dices = []
+            defender_dices = []
+
+            for i in range(attack_dice_nb):
+                attack_dices.append(random.randint(1, 6))
+            for i in range(min(target.troops, 2)):
+                defender_dices.append(random.randint(1, 6))
+
+            attack_dices = sorted(attack_dices, reverse=True)
+            defender_dices = sorted(defender_dices, reverse=True)
+
+            for j in range(min(len(attack_dices), len(defender_dices))):
+                if attack_dices[j] > defender_dices[j]:
+                    defender_loss += 1
+                else:
+                    attack_loss += 1
+
+        return (attack_loss, defender_loss)
 
     def reinforce_phase(self, player):
         pass

@@ -139,9 +139,75 @@ class Game:
         )
         return result
 
-    def attack_phase(self, player):
-        """"""
-        pass
+    def attack_phase(self, player: Player):
+        """
+        For bot so far: choose randomly 1 territory to attack another
+        The sanity checks are out of the random choice, for later implementation
+        """
+        if player.is_bot:
+
+            # TODO
+            if not self.has_valid_attack(player):
+                print(f"You do not have any valid attack")
+                return
+
+            # For now, we attack at random until we pick a valid choice, and only attack once.
+            is_valid = False
+            while not is_valid:
+
+                attacker = random.choice(player.controlled_territories)
+                target = random.choice(self.game_map.territories)
+                attack_dice_nb = random.randint(1, min(3, attacker.troops))
+                is_valid = self.roll_dice_sanity_checks(
+                    player, attacker, target, attack_dice_nb
+                )
+
+            if is_valid:
+                attacker_loss, defender_loss = self.roll_dice(
+                    player, attacker, target, attack_dice_nb
+                )
+                # TODO: remove corresponding troops number
+
+        else:
+            raise NotImplementedError("Only bot players for now")
+
+    def has_valid_attack(self, player):
+        """
+        True if there is at least 1 territory with 2 troops or more adjacent to another player's territory
+        """
+        # TODO
+        return True
+
+    def roll_dice_sanity_checks(
+        self, attack_player, attacker_territory, target, attack_dice, nb
+    ):
+        """
+        Return true if the attack is valid, false otherwise
+        1 sanity checks:
+            . attacker is controlled by player
+            . target is NOT controlled by player
+            . target is connected to attacker
+            . attacker has at least attack_dice_nb available & more than 1 troop
+        """
+        return True
+
+    def roll_dice(self, attack_player, attacker_territory, target, attack_dice_nb):
+        """
+        Returns tuple: [attacker_loss, defender_loss]
+        """
+        if self.true_random:
+            pass
+
+        """
+        2. Dice rolls: 
+            . On assigne à chaque dès attack. un nombre aléatoire entre 1 et 6 (entre 1 et 3 dés)
+            . On assigne à chaque dés def. un nombre aléatoire entre 1 et 6 (entre 1 et 2 dés)
+            . Sort both dices
+            . From inverse order, look at highest dice values
+            . For each pair of dice, add loosing troop
+            . Return loosing troops
+        """
+        return (0, 0)
 
     def reinforce_phase(self, player):
         pass

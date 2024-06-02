@@ -70,13 +70,20 @@ class Game:
             territory = Territory(name, t_data["adjacent_territories_ids"])
             territories.append(territory)
 
+        game_map = Map(map_name, territories, continents)
+
         for name, c_data in map_metadata["continents"].items():
+            c_territories = [
+                game_map.get_territory_from_name(t) for t in c_data["territories"]
+            ]
+
             continent = Continent(
                 name, c_data["territories"], troops_reward=c_data["troops_reward"]
             )
             continents.append(continent)
 
-        game_map = Map(map_name, territories, continents)
+        game_map.update_continents(continents)
+
         self.map_repr = map_metadata["repr"]
         return game_map
 

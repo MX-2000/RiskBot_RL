@@ -24,3 +24,9 @@ class Map:
         result = [t for t in self.territories if t.name == name]
         assert len(result) == 1
         return result[0]
+
+    def update_continents(self, continents: list[Continent]):
+        """
+        Used at load time for convenience, after init
+        """
+        self.continents = continents

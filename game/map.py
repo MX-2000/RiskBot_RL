@@ -21,4 +21,6 @@ class Map:
         """
         Returns the territory object
         """
-        return [t for t in self.territories if t.name == name][0]
+        result = [t for t in self.territories if t.name == name]
+        assert len(result) == 1
+        return result[0]

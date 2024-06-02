@@ -35,8 +35,8 @@ class Game:
         """
         print(self.map_repr)
         for continent in self.game_map.continents:
-            for t_name in continent.territories:
-                t = self.game_map.get_territory_from_name(t_name)
+            for t in continent.territories:
+                # t = self.game_map.get_territory_from_name(t_name)
                 print(f"{t.name} - O: {t.occupying_player_name} - Troops: {t.troops}")
         print("--------------------------")
         for player in self.players:
@@ -78,7 +78,7 @@ class Game:
             ]
 
             continent = Continent(
-                name, c_data["territories"], troops_reward=c_data["troops_reward"]
+                name, c_territories, troops_reward=c_data["troops_reward"]
             )
             continents.append(continent)
 
@@ -140,7 +140,7 @@ class Game:
         """
         self.init_players()
         self.render()
-
+        return
         remaining_players = self.players
 
         while len(remaining_players) > 1:

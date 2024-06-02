@@ -10,6 +10,7 @@ from game.map import Map
 from game.territory import Territory
 from game.continent import Continent
 from game.utils import wait_for_cmd_action
+from game.dice_rolls import roll_dices, roll_dices_sanity_checks
 
 PAUSE_BTW_ACTIONS = 5
 
@@ -158,13 +159,13 @@ class Game:
                 attacker = random.choice(player.controlled_territories)
                 target = random.choice(self.game_map.territories)
                 attack_dice_nb = random.randint(1, min(3, attacker.troops))
-                is_valid = self.roll_dices_sanity_checks(
+                is_valid = roll_dices_sanity_checks(
                     player, attacker, target, attack_dice_nb
                 )
 
             if is_valid:
-                attacker_loss, defender_loss = self.roll_dices(
-                    player, attacker, target, attack_dice_nb
+                attacker_loss, defender_loss = roll_dices(
+                    player, attacker, target, attack_dice_nb, self.true_random
                 )
                 # TODO: remove corresponding troops number
 
@@ -177,75 +178,6 @@ class Game:
         """
         # TODO
         return True
-
-    def roll_dices_sanity_checks(
-        self,
-        attack_player: Player,
-        attacker_territory: Territory,
-        target: Territory,
-        attack_dice_nb: int,
-    ):
-        """
-        Return true if the attack is valid, false otherwise
-        1 sanity checks:
-            . attacker is controlled by player
-            . target is NOT controlled by player
-            . target is connected to attacker
-            . attacker has at least attack_dice_nb available & more than 1 troop
-        """
-        if attack_player.name != attacker_territory.occupying_player_name:
-            return False
-        if attack_player.name == target.occupying_player_name:
-            return False
-        if target.name not in attacker_territory.adjacent_territories_ids:
-            return False
-        if attacker_territory.troops < 2:
-            return False
-
-        return True
-
-    def roll_dices(
-        self,
-        attack_player: Player,
-        attacker_territory: Territory,
-        target: Territory,
-        attack_dice_nb: int,
-    ):
-        """
-        Returns tuple: [attacker_loss, defender_loss]
-        """
-        """
-        2. Dice rolls: 
-            . On assigne à chaque dès attack. un nombre aléatoire entre 1 et 6 (entre 1 et 3 dés)
-            . On assigne à chaque dés def. un nombre aléatoire entre 1 et 6 (entre 1 et 2 dés)
-            . Sort both dices
-            . From inverse order, look at highest dice values
-            . For each pair of dice, add loosing troop
-            . Return loosing troops
-        """
-        if self.true_random:
-
-            attack_loss = 0
-            defender_loss = 0
-
-            attack_dices = []
-            defender_dices = []
-
-            for i in range(attack_dice_nb):
-                attack_dices.append(random.randint(1, 6))
-            for i in range(min(target.troops, 2)):
-                defender_dices.append(random.randint(1, 6))
-
-            attack_dices = sorted(attack_dices, reverse=True)
-            defender_dices = sorted(defender_dices, reverse=True)
-
-            for j in range(min(len(attack_dices), len(defender_dices))):
-                if attack_dices[j] > defender_dices[j]:
-                    defender_loss += 1
-                else:
-                    attack_loss += 1
-
-        return (attack_loss, defender_loss)
 
     def reinforce_phase(self, player):
         pass

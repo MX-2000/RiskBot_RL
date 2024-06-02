@@ -179,7 +179,11 @@ class Game:
         return True
 
     def roll_dice_sanity_checks(
-        self, attack_player, attacker_territory, target, attack_dice, nb
+        self,
+        attack_player: Player,
+        attacker_territory: Territory,
+        target: Territory,
+        attack_dice_nb: int,
     ):
         """
         Return true if the attack is valid, false otherwise
@@ -189,6 +193,15 @@ class Game:
             . target is connected to attacker
             . attacker has at least attack_dice_nb available & more than 1 troop
         """
+        if attack_player.name != attacker_territory.occupying_player_name:
+            return False
+        if attack_player.name == target.occupying_player_name:
+            return False
+        if target.name not in attacker_territory.adjacent_territories_ids:
+            return False
+        if attacker_territory.troops < 2:
+            return False
+
         return True
 
     def roll_dice(self, attack_player, attacker_territory, target, attack_dice_nb):

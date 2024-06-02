@@ -7,6 +7,7 @@ class Player:
         self.is_bot = is_bot
         self.controlled_territories: list[Territory] = []
         self.cards = None
+        self.is_dead = False
 
     def assign_territory(self, territory: Territory):
         """

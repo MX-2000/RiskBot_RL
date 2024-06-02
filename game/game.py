@@ -77,10 +77,20 @@ class Game:
         self.map_repr = map_metadata["repr"]
         return game_map
 
-    def create(self, players, map, rules):
+    def draft_phase(self, player):
         """
-        Initialize game variables
+        Go through the drafting phase for a player
         """
+        pass
+
+    def attack_phase(self, player):
+        """"""
+        pass
+
+    def reinforce_phase(self, player):
+        pass
+
+    def card_phase(self, player):
         pass
 
     def play(self):
@@ -89,7 +99,24 @@ class Game:
         """
         self.init_players()
         self.render()
-        pass
+
+        remaining_players = self.players
+
+        while len(remaining_players) > 1:
+
+            for player in remaining_players:
+
+                if player.is_dead:
+                    continue
+
+                self.draft_phase(player)
+                self.attack_phase(player)
+                self.reinforce_phase(player)
+                self.card_phase(player)
+
+            remaining_players = [
+                player for player in self.players if not player.is_dead
+            ]
 
     def init_players(self):
         """

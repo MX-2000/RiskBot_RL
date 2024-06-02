@@ -1,1 +1,57 @@
-{"name": "test_map_v0", "territory_number": 4, "max_players": 2, "continent_nb": 2, "continents": {"small_continent": {"name": "small_continent", "territories": ["territory_1"], "troops_reward": 1}, "medium_continent": {"name": "medium_continent", "territories": ["territory_2", "territory_3", "territory_4"], "troops_reward": 3}}, "territories": {"territory_1": {"name": "territory_1", "adjacent_territories_ids": ["territory_2", "territory_3"]}, "territory_2": {"name": "territory_2", "adjacent_territories_ids": ["territory_3", "territory_4", "territory_1"]}, "territory_3": {"name": "territory_3", "adjacent_territories_ids": ["territory_3", "territory_4", "territory_1"]}, "territory_4": {"name": "territory_4", "adjacent_territories_ids": ["territory_2", "territory_3"]}}, "repr": "\n\n                     _____________\n                    /             \\\n                   /               \\\n   _______________/        2       |_______________\n   /               \\  bonus_2: 3t  |               \\\n   |       1       |               |               |\n   |  bonus_1: 1t  |_______________/\\     4        |\n   |               |                | bonus_2: 3t  |\n   |               |                |              |\n   \\_______________/       3        |______________|\n                  /    bonus_2: 3t  /\n                  |                /\n                  \\_______________/\n"}
+{
+    "name": "test_map_v0",
+    "territory_number": 4,
+    "max_players": 3,
+    "continent_nb": 2,
+    "continents": {
+        "small_continent": {
+            "name": "small_continent",
+            "territories": [
+                "territory_1"
+            ],
+            "troops_reward": 1
+        },
+        "medium_continent": {
+            "name": "medium_continent",
+            "territories": [
+                "territory_2",
+                "territory_3",
+                "territory_4"
+            ],
+            "troops_reward": 3
+        }
+    },
+    "territories": {
+        "territory_1": {
+            "name": "territory_1",
+            "adjacent_territories_ids": [
+                "territory_2",
+                "territory_3"
+            ]
+        },
+        "territory_2": {
+            "name": "territory_2",
+            "adjacent_territories_ids": [
+                "territory_3",
+                "territory_4",
+                "territory_1"
+            ]
+        },
+        "territory_3": {
+            "name": "territory_3",
+            "adjacent_territories_ids": [
+                "territory_3",
+                "territory_4",
+                "territory_1"
+            ]
+        },
+        "territory_4": {
+            "name": "territory_4",
+            "adjacent_territories_ids": [
+                "territory_2",
+                "territory_3"
+            ]
+        }
+    },
+    "repr": "\n\n                     _____________\n                    /             \\\n                   /               \\\n   _______________/        2       |_______________\n   /               \\  bonus_2: 3t  |               \\\n   |       1       |               |               |\n   |  bonus_1: 1t  |_______________/\\     4        |\n   |               |                | bonus_2: 3t  |\n   |               |                |              |\n   \\_______________/       3        |______________|\n                  /    bonus_2: 3t  /\n                  |                /\n                  \\_______________/\n"
+}

@@ -33,25 +33,40 @@ class Player:
         return result
 
     def draft_choose_troops_to_deploy(self):
-        pass
+        raise NotImplementedError
 
     def draft_choose_territory_to_deploy(self):
-        pass
+        raise NotImplementedError
 
     def attack_choose_attack_territory(self):
-        pass
+        raise NotImplementedError
 
     def attack_choose_target_territory(self):
-        pass
+        raise NotImplementedError
 
     def attack_choose_attack_dices(self):
-        pass
+        raise NotImplementedError
 
     def reinforce_choose_from(self):
-        pass
+        raise NotImplementedError
 
     def reinforce_choose_to(self):
-        pass
+        raise NotImplementedError
 
     def reinforce_choose_troops_nb(self):
-        pass
+        raise NotImplementedError
+
+
+class Player_Random(Player):
+    def __init__(self, name, is_bot) -> None:
+        super().__init__(name, is_bot)
+
+
+class Player_Human(Player):
+    def __init__(self, name, is_bot) -> None:
+        super().__init__(name, is_bot)
+
+
+class Player_RL(Player):
+    def __init__(self, name, is_bot) -> None:
+        super().__init__(name, is_bot)

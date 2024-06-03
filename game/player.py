@@ -31,3 +31,27 @@ class Player:
         for t in self.controlled_territories:
             result += t.troops
         return result
+
+    def draft_choose_troops_to_deploy(self):
+        pass
+
+    def draft_choose_territory_to_deploy(self):
+        pass
+
+    def attack_choose_attack_territory(self):
+        pass
+
+    def attack_choose_target_territory(self):
+        pass
+
+    def attack_choose_attack_dices(self):
+        pass
+
+    def reinforce_choose_from(self):
+        pass
+
+    def reinforce_choose_to(self):
+        pass
+
+    def reinforce_choose_troops_nb(self):
+        pass

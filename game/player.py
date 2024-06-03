@@ -2,9 +2,8 @@ from game.territory import Territory
 
 
 class Player:
-    def __init__(self, name, is_bot) -> None:
+    def __init__(self, name) -> None:
         self.name = name
-        self.is_bot = is_bot
         self.controlled_territories: list[Territory] = []
         self.cards = None
         self.is_dead = False
@@ -60,6 +59,21 @@ class Player:
 class Player_Random(Player):
     def __init__(self, name, is_bot) -> None:
         super().__init__(name, is_bot)
+
+    def draft_choose_troops_to_deploy(self):
+        raise NotImplementedError
+
+    def draft_choose_territory_to_deploy(self):
+        raise NotImplementedError
+
+    def attack_choose_attack_territory(self):
+        raise NotImplementedError
+
+    def attack_choose_target_territory(self):
+        raise NotImplementedError
+
+    def attack_choose_attack_dices(self):
+        pass
 
 
 class Player_Human(Player):

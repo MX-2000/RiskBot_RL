@@ -39,13 +39,13 @@ class Player:
     def draft_choose_territory_to_deploy(self) -> Territory:
         raise NotImplementedError
 
-    def attack_choose_attack_territory(self):
+    def attack_choose_attack_territory(self) -> Territory:
         raise NotImplementedError
 
-    def attack_choose_target_territory(self):
+    def attack_choose_target_territory(self, attack_territory: Territory) -> str:
         raise NotImplementedError
 
-    def attack_choose_attack_dices(self):
+    def attack_choose_attack_dices(self, attacker_troops: int) -> int:
         raise NotImplementedError
 
     def reinforce_choose_from(self):
@@ -69,13 +69,34 @@ class Player_Random(Player):
         return random.choice(self.controlled_territories)
 
     def attack_choose_attack_territory(self):
-        raise NotImplementedError
+        t_with_more_than_one_troop = [
+            t for t in self.controlled_territories if t.troops > 1
+        ]
+        if len(t_with_more_than_one_troop) == 0:
+            return
+        return random.choice(t_with_more_than_one_troop)
 
-    def attack_choose_target_territory(self):
-        raise NotImplementedError
+    def attack_choose_target_territory(self, attack_territory: Territory) -> str:
+        """
+        Return territory name
+        """
+        adjacent_territories = attack_territory.adjacent_territories_ids
+        # Target randomly an adjacent territory that isn't our own
+        try:
+            target = random.choice(
+                [
+                    t
+                    for t in adjacent_territories
+                    if t not in [p_t.name for p_t in self.controlled_territories]
+                ]
+            )
+            return target
+        except IndexError:
+            # all adjacent territories are player's
+            return
 
-    def attack_choose_attack_dices(self):
-        pass
+    def attack_choose_attack_dices(self, attacker_troops):
+        return random.randint(1, min(3, attacker_troops))
 
 
 class Player_Human(Player):

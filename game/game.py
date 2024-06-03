@@ -143,37 +143,21 @@ class Game:
         """
         self.game_phase = "ATTACK"
 
-        # Need to plug in player methods
-
         # TODO
         if not self.has_valid_attack(player):
             print(f"You do not have any valid attack")
             return
 
-        # For now, we attack at random until we pick a valid choice, and only attack once.
+        # Choose territories to attack
         is_valid = False
         while not is_valid:
 
             # Random pick amongst own player territories
-            attacker = random.choice(player.controlled_territories)
-            adjacent_territories = [
-                self.game_map.get_territory_from_name(t)
-                for t in attacker.adjacent_territories_ids
-            ]
-            # Target randomly an adjacent territory that isn't our own
-            try:
-                target = random.choice(
-                    [
-                        t
-                        for t in adjacent_territories
-                        if t.occupying_player_name != player.name
-                    ]
-                )
-            except IndexError:
-                # all adjacent territories are player's
-                continue
+            attacker = player.attack_choose_attack_territory()
+            target_name = player.attack_choose_target_territory(attacker)
+            target = self.game_map.get_territory_from_name(target_name)
 
-            attack_dice_nb = random.randint(1, min(3, attacker.troops))
+            attack_dice_nb = player.attack_choose_attack_dices(attacker.troops)
             is_valid = roll_dices_sanity_checks(
                 player, attacker, target, attack_dice_nb
             )
@@ -182,9 +166,8 @@ class Game:
             )
             time.sleep(PAUSE_BTW_ACTIONS)
 
+        # Attack
         if is_valid:
-            logger.debug(f"Last attack setting was valid.")
-
             defender_remaining = target.troops
             # We roll until attacker or defender is exhausted
             # TODO: udpate attacking dice as troop number reduce under 3 or 2 for attack/defender

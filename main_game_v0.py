@@ -2,7 +2,7 @@ import argparse
 import os
 
 from game.game import Game
-from game.player import Player
+from game.player import Player_Random, Player_Human, Player_RL
 
 
 def parse_player(player_string):
@@ -65,7 +65,10 @@ def main():
     players = []
     name_set = set()
     for i, player in enumerate(players_args):
-        p = Player(player["name"], is_bot=player["is_bot"])
+        if player["is_bot"]:
+            p = Player_Random(player["name"])
+        else:
+            p = Player_Human(player["name"])
         players.append(p)
         name_set.add(player["name"])
 

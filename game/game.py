@@ -109,19 +109,13 @@ class Game:
 
         while troops_to_deploy > 0:
 
-            if player.is_bot:
-                # Doing random for now
-                deploying = random.randint(1, troops_to_deploy)
-                territory = random.choice(player.controlled_territories)
-                territory.add_troops(deploying)
-                troops_to_deploy -= deploying
-                print(f"{player.name} deployed {deploying} troops in {territory.name}")
-                time.sleep(PAUSE_BTW_ACTIONS)
-            else:
-                # TODO prompt
-                raise NotImplementedError(
-                    f"{player.name} is human, Not Implemented for now."
-                )
+            # Doing random for now. Need to plug in player methods.
+            deploying = player.draft_choose_troops_to_deploy(troops_to_deploy)
+            territory = player.draft_choose_territory_to_deploy()
+            territory.add_troops(deploying)
+            troops_to_deploy -= deploying
+            print(f"{player.name} deployed {deploying} troops in {territory.name}")
+            time.sleep(PAUSE_BTW_ACTIONS)
 
     def get_deployment_troops(self, player: Player, card_troops=0):
         """
@@ -149,97 +143,92 @@ class Game:
         """
         self.game_phase = "ATTACK"
 
-        if player.is_bot:
+        # Need to plug in player methods
 
-            # TODO
-            if not self.has_valid_attack(player):
-                print(f"You do not have any valid attack")
-                return
+        # TODO
+        if not self.has_valid_attack(player):
+            print(f"You do not have any valid attack")
+            return
 
-            # For now, we attack at random until we pick a valid choice, and only attack once.
-            is_valid = False
-            while not is_valid:
+        # For now, we attack at random until we pick a valid choice, and only attack once.
+        is_valid = False
+        while not is_valid:
 
-                # Random pick amongst own player territories
-                attacker = random.choice(player.controlled_territories)
-                adjacent_territories = [
-                    self.game_map.get_territory_from_name(t)
-                    for t in attacker.adjacent_territories_ids
-                ]
-                # Target randomly an adjacent territory that isn't our own
-                try:
-                    target = random.choice(
-                        [
-                            t
-                            for t in adjacent_territories
-                            if t.occupying_player_name != player.name
-                        ]
-                    )
-                except IndexError:
-                    # all adjacent territories are player's
-                    continue
+            # Random pick amongst own player territories
+            attacker = random.choice(player.controlled_territories)
+            adjacent_territories = [
+                self.game_map.get_territory_from_name(t)
+                for t in attacker.adjacent_territories_ids
+            ]
+            # Target randomly an adjacent territory that isn't our own
+            try:
+                target = random.choice(
+                    [
+                        t
+                        for t in adjacent_territories
+                        if t.occupying_player_name != player.name
+                    ]
+                )
+            except IndexError:
+                # all adjacent territories are player's
+                continue
 
-                attack_dice_nb = random.randint(1, min(3, attacker.troops))
-                is_valid = roll_dices_sanity_checks(
-                    player, attacker, target, attack_dice_nb
+            attack_dice_nb = random.randint(1, min(3, attacker.troops))
+            is_valid = roll_dices_sanity_checks(
+                player, attacker, target, attack_dice_nb
+            )
+            logger.debug(
+                f"{player.name} trying to attack from {attacker.name} to {target.name} with {attack_dice_nb} troops."
+            )
+            time.sleep(PAUSE_BTW_ACTIONS)
+
+        if is_valid:
+            logger.debug(f"Last attack setting was valid.")
+
+            defender_remaining = target.troops
+            # We roll until attacker or defender is exhausted
+            # TODO: udpate attacking dice as troop number reduce under 3 or 2 for attack/defender
+            while defender_remaining > 0 and roll_dices_sanity_checks(
+                player, attacker, target, attack_dice_nb
+            ):
+
+                attacker_loss, defender_loss = roll_dices(
+                    player, attacker, target, attack_dice_nb, self.true_random
                 )
                 logger.debug(
-                    f"{player.name} trying to attack from {attacker.name} to {target.name} with {attack_dice_nb} troops."
+                    f"Attacker lost {attacker_loss}, Defender lost {defender_loss}"
+                )
+                attack_remaining = attacker.remove_troops(attacker_loss)
+                defender_remaining = target.remove_troops(defender_loss)
+                logger.debug(
+                    f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
                 )
                 time.sleep(PAUSE_BTW_ACTIONS)
 
-            if is_valid:
-                logger.debug(f"Last attack setting was valid.")
+            if defender_remaining == 0:
+                logger.debug(
+                    f"Territory got conquered, transferring troops and ownership"
+                )
+                # Update ownership
+                target_player = self.get_player_by_name(target.occupying_player_name)
+                target_player.remove_territory(target)
+                player.assign_territory(target)
 
-                defender_remaining = target.troops
-                # We roll until attacker or defender is exhausted
-                # TODO: udpate attacking dice as troop number reduce under 3 or 2 for attack/defender
-                while defender_remaining > 0 and roll_dices_sanity_checks(
-                    player, attacker, target, attack_dice_nb
-                ):
+                # Move attaker troops
+                # We move a minimum of (remaining_troops -1, attack_dice_nb)
+                min_to_move = min(attack_dice_nb, attack_remaining - 1)
+                max_to_move = attack_remaining - 1
 
-                    attacker_loss, defender_loss = roll_dices(
-                        player, attacker, target, attack_dice_nb, self.true_random
-                    )
-                    logger.debug(
-                        f"Attacker lost {attacker_loss}, Defender lost {defender_loss}"
-                    )
-                    attack_remaining = attacker.remove_troops(attacker_loss)
-                    defender_remaining = target.remove_troops(defender_loss)
-                    logger.debug(
-                        f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
-                    )
-                    time.sleep(PAUSE_BTW_ACTIONS)
+                # For now we move the maximum we can
+                mooving = max_to_move
+                attacker.remove_troops(mooving)
+                target.add_troops(mooving)
 
-                if defender_remaining == 0:
-                    logger.debug(
-                        f"Territory got conquered, transferring troops and ownership"
-                    )
-                    # Update ownership
-                    target_player = self.get_player_by_name(
-                        target.occupying_player_name
-                    )
-                    target_player.remove_territory(target)
-                    player.assign_territory(target)
+                # If we killed the target
+                if len(target_player.controlled_territories) == 0:
+                    target_player.is_dead = True
 
-                    # Move attaker troops
-                    # We move a minimum of (remaining_troops -1, attack_dice_nb)
-                    min_to_move = min(attack_dice_nb, attack_remaining - 1)
-                    max_to_move = attack_remaining - 1
-
-                    # For now we move the maximum we can
-                    mooving = max_to_move
-                    attacker.remove_troops(mooving)
-                    target.add_troops(mooving)
-
-                    # If we killed the target
-                    if len(target_player.controlled_territories) == 0:
-                        target_player.is_dead = True
-
-                        # TODO transfer cards, maybe somewhere else. I can see redudancy here with human as well, need refactor.
-
-        else:
-            raise NotImplementedError("Only bot players for now")
+                    # TODO transfer cards, maybe somewhere else. I can see redudancy here with human as well, need refactor.
 
     def get_player_by_name(self, player_name):
         result = [p for p in self.players if p.name == player_name]

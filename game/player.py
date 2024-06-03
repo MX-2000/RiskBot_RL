@@ -1,3 +1,5 @@
+import random
+
 from game.territory import Territory
 
 
@@ -31,10 +33,10 @@ class Player:
             result += t.troops
         return result
 
-    def draft_choose_troops_to_deploy(self):
+    def draft_choose_troops_to_deploy(self, troops_to_deploy):
         raise NotImplementedError
 
-    def draft_choose_territory_to_deploy(self):
+    def draft_choose_territory_to_deploy(self) -> Territory:
         raise NotImplementedError
 
     def attack_choose_attack_territory(self):
@@ -57,14 +59,14 @@ class Player:
 
 
 class Player_Random(Player):
-    def __init__(self, name, is_bot) -> None:
-        super().__init__(name, is_bot)
+    def __init__(self, name) -> None:
+        super().__init__(name)
 
-    def draft_choose_troops_to_deploy(self):
-        raise NotImplementedError
+    def draft_choose_troops_to_deploy(self, troops_to_deploy):
+        return random.randint(1, troops_to_deploy)
 
-    def draft_choose_territory_to_deploy(self):
-        raise NotImplementedError
+    def draft_choose_territory_to_deploy(self) -> Territory:
+        return random.choice(self.controlled_territories)
 
     def attack_choose_attack_territory(self):
         raise NotImplementedError
@@ -77,10 +79,10 @@ class Player_Random(Player):
 
 
 class Player_Human(Player):
-    def __init__(self, name, is_bot) -> None:
-        super().__init__(name, is_bot)
+    def __init__(self, name) -> None:
+        super().__init__(name)
 
 
 class Player_RL(Player):
-    def __init__(self, name, is_bot) -> None:
-        super().__init__(name, is_bot)
+    def __init__(self, name) -> None:
+        super().__init__(name)

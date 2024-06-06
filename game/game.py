@@ -148,38 +148,63 @@ class Game:
             print(f"You do not have any valid attack")
             return
 
-        # Choose territories to attack
-        is_valid = False
-        while not is_valid:
+        time_remaining = 100  # TODO: implement time function at some point
+        while time_remaining > 0 and len(self.get_remaining_players()) > 1:
+            if not self.has_valid_attack(player):
+                break
+            if not player.attack_wants_attack():
+                break
 
-            # Random pick amongst own player territories
             attacker = player.attack_choose_attack_territory()
             target_name = player.attack_choose_target_territory(attacker)
             target = self.game_map.get_territory_from_name(target_name)
+            attack_dice_nb, blitz = player.attack_choose_attack_dices(attacker.troops)
 
-            attack_dice_nb = player.attack_choose_attack_dices(attacker.troops)
+            # Sanity checks
             is_valid = roll_dices_sanity_checks(
                 player, attacker, target, attack_dice_nb
             )
             logger.debug(
-                f"{player.name} trying to attack from {attacker.name} to {target.name} with {attack_dice_nb} troops."
+                f"{player.name} trying to attack from {attacker.name} to {target.name} with {attack_dice_nb} troops. Blitz? {blitz}"
             )
             time.sleep(PAUSE_BTW_ACTIONS)
+            if not is_valid:
+                break
 
-        # Attack
-        if is_valid:
             defender_remaining = target.troops
-            # We roll until attacker or defender is exhausted
-            # TODO: udpate attacking dice as troop number reduce under 3 or 2 for attack/defender
-            while defender_remaining > 0 and roll_dices_sanity_checks(
-                player, attacker, target, attack_dice_nb
-            ):
 
+            def attack_once(player, attacker, target, attack_dice_nb, true_random):
+                logger.debug(
+                    f"{player.name} Attacking from {attacker.name} to {target.name} with {attack_dice_nb} dices."
+                )
                 attacker_loss, defender_loss = roll_dices(
-                    player, attacker, target, attack_dice_nb, self.true_random
+                    player, attacker, target, attack_dice_nb, true_random
                 )
                 logger.debug(
                     f"Attacker lost {attacker_loss}, Defender lost {defender_loss}"
+                )
+                return attacker_loss, defender_loss
+
+            if blitz:
+                while defender_remaining > 0 and attack_dice_nb > 0:
+                    if not roll_dices_sanity_checks(
+                        player, attacker, target, attack_dice_nb
+                    ):
+                        attack_dice_nb -= 1
+                        continue
+                    attacker_loss, defender_loss = attack_once(
+                        player, attacker, target, attack_dice_nb, self.true_random
+                    )
+                    attack_remaining = attacker.remove_troops(attacker_loss)
+                    defender_remaining = target.remove_troops(defender_loss)
+                    logger.debug(
+                        f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
+                    )
+                    time.sleep(PAUSE_BTW_ACTIONS)
+
+            else:
+                attacker_loss, defender_loss = attack_once(
+                    player, attacker, target, attack_dice_nb, self.true_random
                 )
                 attack_remaining = attacker.remove_troops(attacker_loss)
                 defender_remaining = target.remove_troops(defender_loss)
@@ -211,7 +236,7 @@ class Game:
                 if len(target_player.controlled_territories) == 0:
                     target_player.is_dead = True
 
-                    # TODO transfer cards, maybe somewhere else. I can see redudancy here with human as well, need refactor.
+                    # TODO transfer cards
 
     def get_player_by_name(self, player_name):
         result = [p for p in self.players if p.name == player_name]
@@ -268,6 +293,9 @@ class Game:
             self.turn_number += 1
 
         print(f"Player: {remaining_players[0].name} Won!!")
+
+    def get_remaining_players(self):
+        return [player for player in self.players if not player.is_dead]
 
     def init_players(self):
         """

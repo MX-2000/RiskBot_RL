@@ -33,6 +33,9 @@ class Player:
             result += t.troops
         return result
 
+    def attack_wants_attack(self):
+        raise NotImplementedError
+
     def draft_choose_troops_to_deploy(self, troops_to_deploy):
         raise NotImplementedError
 
@@ -45,7 +48,11 @@ class Player:
     def attack_choose_target_territory(self, attack_territory: Territory) -> str:
         raise NotImplementedError
 
-    def attack_choose_attack_dices(self, attacker_troops: int) -> int:
+    def attack_choose_attack_dices(self, attacker_troops: int):
+        """
+        Returns tuple with number of troops to attack, and boolean (dice_number, blitz)
+        blitz is true if wants to roll all troops at once (and puts the dice nb to max)
+        """
         raise NotImplementedError
 
     def reinforce_choose_from(self):
@@ -61,6 +68,10 @@ class Player:
 class Player_Random(Player):
     def __init__(self, name) -> None:
         super().__init__(name)
+
+    def attack_wants_attack(self):
+        # Random player always attack as long as it can
+        return True
 
     def draft_choose_troops_to_deploy(self, troops_to_deploy):
         return random.randint(1, troops_to_deploy)
@@ -96,7 +107,8 @@ class Player_Random(Player):
             return
 
     def attack_choose_attack_dices(self, attacker_troops):
-        return random.randint(1, min(3, attacker_troops))
+        # Random player always blitz with maximum troops
+        return min(3, attacker_troops), True
 
 
 class Player_Human(Player):

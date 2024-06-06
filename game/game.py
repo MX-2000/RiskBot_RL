@@ -243,12 +243,27 @@ class Game:
         assert len(result) == 1
         return result[0]
 
-    def has_valid_attack(self, player):
+    def has_valid_attack(self, player: Player):
         """
         True if there is at least 1 territory with 2 troops or more adjacent to another player's territory
         """
-        # TODO
-        return True
+        # Territories with more than 1 troop:
+        potential_attack_t = [t for t in player.controlled_territories if t.troops > 1]
+        if len(potential_attack_t) == 0:
+            return False
+
+        # If any has an adjacent territory that isn't controlled by player, then we have a valid attack possible
+        for t in potential_attack_t:
+            adjacent_territories_names = t.adjacent_territories_ids
+            if any(
+                [
+                    adj_terr_name
+                    not in [p_t.name for p_t in player.controlled_territories]
+                    for adj_terr_name in adjacent_territories_names
+                ]
+            ):
+                return True
+        return False
 
     def reinforce_phase(self, player):
         self.game_phase = "FORTIFY"

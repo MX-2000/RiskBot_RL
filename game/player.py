@@ -11,6 +11,11 @@ class Player:
         self.cards = None
         self.is_dead = False
 
+    def reset(self):
+        self.controlled_territories = []
+        self.cards = None
+        self.is_dead = False
+
     def assign_territory(self, territory: Territory):
         """
         Puts the territory under player's control

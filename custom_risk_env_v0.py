@@ -100,6 +100,20 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
     def _get_info(self):
         return
 
+    def reset(self, seed=None, options=None):
+        # We need the following line to seed self.np_random
+        super().reset(seed=seed)
+
+        observation = self._get_obs()
+        info = self._get_info()
+
+        self.game.reset()
+
+        if self.render_mode == "human":
+            self._render_frame()
+
+        return observation, info
+
 
 if __name__ == "__main__":
     p1 = Player_Random("p1")

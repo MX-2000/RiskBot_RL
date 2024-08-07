@@ -39,6 +39,18 @@ class Game:
 
         self.game_map = self.load_map(map_name)
 
+    def reset(self):
+        """
+        Called by the environment
+        """
+        self.turn_number = 1
+        self.game_phase = None
+        self.active_player = None
+        self.attacking_territory = None
+        self.load_map(self.map_name)
+        for p in self.players:
+            p.reset()
+
     def _set_players_id(self):
         for i, p in enumerate(self.players):
             p.id_ = i

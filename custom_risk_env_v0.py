@@ -39,7 +39,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 "attacking_territory": spaces.Discrete(
                     num_territories
                 ),  # Scalar - which territory are we attacking from
-                "connections": spaces.MultiBinary(
+                "connexions": spaces.MultiBinary(
                     num_territories * num_territories
                 ),  # Flattened adjacency matrix
             }
@@ -59,19 +59,48 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         territory_ids = []
         num_troops = []
         player_ids_territory = []
+        connexions = []
         for t in self.game.game_map.territories:
             territory_ids.append(t.id_)
             num_troops.append(t.troops)
             player_ids_territory.append(
                 self.game.get_player_by_name(t.occupying_player_name).id_
             )
+            t_connexions = [0] * len(self.game.game_map.territories)
+            for t_name in t.adjacent_territories_ids:
+                t_id = self.game.game_map.get_territory_from_name(t_name).id_
+                t_connexions[t_id] = 1
+            connexions.extend(t_connexions)
 
         continent_ids = []
-        continent_territories = []
+        continent_territories = []  # Binaries of length num_territories
+        for c in self.game.game_map.continents:
+            continent_ids.append(c.id_)
+            c_territories = [0] * len(game.game_map.territories)
+            c_terr_ids = [t.id_ for t in c.territories]
+            for idx in c_terr_ids:
+                c_territories[idx] = 1
+            continent_territories.extend(c_territories)
+
+        player = self.game.active_player.id_
+
+        attacking_territory = self.game.attacking_territory
+
+        return {
+            "territory_ids": territory_ids,
+            "num_troops": num_troops,
+            "player_ids_territory": player_ids_territory,
+            "continent_ids": continent_ids,
+            "continent_territories": continent_territories,
+            "player": player,
+            "attacking_territory": attacking_territory,
+            "connexions": connexions,
+        }
 
 
 if __name__ == "__main__":
-    p1 = Player_Random("p1")
-    p2 = Player_Random("p2")
+    p1 = Player_Random("p1", 0)
+    p2 = Player_Random("p2", 1)
     game = Game("test_map_v0", [p1, p2])
     env = RiskEnv_Choice_is_attack_territory(game, render_mode=None)
+    print(env._get_obs)

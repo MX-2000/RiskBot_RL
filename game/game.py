@@ -25,14 +25,23 @@ class Game:
     ) -> None:
         self.player_nb = len(players)
         self.players = players
+        self._set_players_id()
         self.map_name = map_name
         self.deck = None
         self.fixed = fixed
         self.true_random = true_random
         self.turn_number = 1
         self.game_phase = None
+        self.active_player = None
+
+        # Usefull to construct observation space
+        self.attacking_territory = None
 
         self.game_map = self.load_map(map_name)
+
+    def _set_players_id(self):
+        for i, p in enumerate(self.players):
+            p.id_ = i
 
     def render(self):
         """
@@ -161,6 +170,7 @@ class Game:
                 break
 
             attacker = player.attack_choose_attack_territory()
+            self.attacking_territory = attacker
             target_name = player.attack_choose_target_territory(attacker)
             target = self.game_map.get_territory_from_name(target_name)
             attack_dice_nb, blitz = player.attack_choose_attack_dices(attacker.troops)
@@ -289,6 +299,8 @@ class Game:
 
         while len(remaining_players) > 1:
             for player in remaining_players:
+                self.active_player = player
+
                 if player.is_dead:
                     continue
 
@@ -297,6 +309,9 @@ class Game:
                 self.render()
                 wait_for_cmd_action()
                 self.attack_phase(player)
+
+                self.attacking_territory = None
+
                 self.render()
                 # self.reinforce_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)

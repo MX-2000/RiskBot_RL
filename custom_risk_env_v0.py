@@ -10,8 +10,9 @@ from game.player import Player, Player_Random
 class RiskEnv_Choice_is_attack_territory(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 0}
 
-    def __init__(self, game: Game, render_mode=None) -> None:
+    def __init__(self, game: Game, agent_player: Player, render_mode=None) -> None:
         self.game = game
+        self.agent_player = agent_player
 
         num_territories = len(game.game_map.territories)
         num_continents = len(game.game_map.continents)
@@ -104,15 +105,30 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
 
+        self.game.reset()
+
+        # We simulate the game until it's the agent's turn
+        self.simulate_until_agents_action()
+
         observation = self._get_obs()
         info = self._get_info()
-
-        self.game.reset()
 
         if self.render_mode == "human":
             self._render_frame()
 
         return observation, info
+
+    def simulate_until_agents_action(self):
+        while self.game.active_player != self.agent_player:
+            self.game.play_turns()
+
+    def step(self, action):
+        done = False
+        reward = 0
+
+        # TODO take action
+
+        # TODO simulate until next turn
 
 
 if __name__ == "__main__":

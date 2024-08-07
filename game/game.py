@@ -50,6 +50,8 @@ class Game:
         self.load_map(self.map_name)
         for p in self.players:
             p.reset()
+        self.init_players()
+        self.remaining_players = self.players
 
     def _set_players_id(self):
         for i, p in enumerate(self.players):
@@ -183,8 +185,13 @@ class Game:
 
             attacker = player.attack_choose_attack_territory()
             self.attacking_territory = attacker
+
+            # ***
             target_name = player.attack_choose_target_territory(attacker)
             target = self.game_map.get_territory_from_name(target_name)
+            self.attack()
+            # ***
+
             attack_dice_nb, blitz = player.attack_choose_attack_dices(attacker.troops)
 
             # Sanity checks
@@ -196,7 +203,7 @@ class Game:
             )
             time.sleep(PAUSE_BTW_ACTIONS)
             if not is_valid:
-                break
+                continue
 
             defender_remaining = target.troops
 
@@ -265,6 +272,9 @@ class Game:
 
                     # TODO transfer cards
 
+    def attack(self, player: Player):
+        pass
+
     def get_player_by_name(self, player_name):
         result = [p for p in self.players if p.name == player_name]
         assert (
@@ -302,9 +312,38 @@ class Game:
     def card_phase(self, player):
         pass
 
+    def play_turns(self):
+        """
+        Re designed for custom gym environment
+        """
+
+        while len(self.remaining_players) > 1:
+            for player in self.remaining_players:
+                self.active_player = player
+
+                if player.is_dead:
+                    continue
+
+                self.draft_phase(player)
+                self.attack_phase(player)
+                self.attacking_territory = None
+                # self.reinforce_phase(player)
+                # time.sleep(PAUSE_BTW_ACTIONS)
+                # self.card_phase(player)
+                # time.sleep(PAUSE_BTW_ACTIONS)
+                # self.render()
+                # time.sleep(PAUSE_BTW_ACTIONS)
+
+            self.remaining_players = [
+                player for player in self.players if not player.is_dead
+            ]
+            self.turn_number += 1
+
+        print(f"Player: {self.remaining_players[0].name} Won!!")
+
     def play(self):
         """
-        Start game loop
+        Start game loop for normal games
         """
         self.init_players()
         self.render()

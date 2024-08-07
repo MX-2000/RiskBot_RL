@@ -30,6 +30,11 @@ class Map:
         assert len(result) == 1
         return result[0]
 
+    def get_continent_from_id(self, id_):
+        result = [c for c in self.continents if c.id_ == id_]
+        assert len(result) == 1
+        return result[0]
+
     def update_continents(self, continents: list[Continent]):
         """
         Used at load time for convenience, after init

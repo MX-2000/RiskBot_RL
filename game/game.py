@@ -312,6 +312,11 @@ class Game:
     def card_phase(self, player):
         pass
 
+    def is_game_over(self):
+        return (
+            len(self.remaining_players) == 1
+        )  # Game is over when only one player remains
+
     def play_turns(self):
         """
         Re designed for custom gym environment
@@ -338,8 +343,6 @@ class Game:
                 player for player in self.players if not player.is_dead
             ]
             self.turn_number += 1
-
-        print(f"Player: {self.remaining_players[0].name} Won!!")
 
     def play(self):
         """

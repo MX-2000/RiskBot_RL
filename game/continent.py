@@ -4,11 +4,11 @@ from game.territory import Territory
 
 class Continent:
     def __init__(
-        self, name, id_, territories_name: list[Territory], troops_reward: int
+        self, name, id_, territories: list[Territory], troops_reward: int
     ) -> None:
         self.name = name
         self.id_ = id_
-        self.territories = territories_name
+        self.territories = territories
         self.troops_rewards = troops_reward
 
     def is_controlled_by(self, player: Player):

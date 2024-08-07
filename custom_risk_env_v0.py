@@ -32,9 +32,9 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 "continent_ids": spaces.MultiDiscrete(
                     [num_continents for _ in range(num_continents)]
                 ),  # Vector (j,) for j continents
-                "player_ids_continent": spaces.MultiDiscrete(
-                    [num_players for _ in range(num_continents)]
-                ),  # Vector(p,) for p players controlling each continent
+                "continent_territories": spaces.MultiBinary(
+                    num_continents * num_territories
+                ),  # Vector(c,t) for territories inside each continent, c continents x t territories
                 "player": spaces.Discrete(num_players),  # Scalar - who is the player
                 "attacking_territory": spaces.Discrete(
                     num_territories
@@ -57,9 +57,17 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         """
 
         territory_ids = []
+        num_troops = []
+        player_ids_territory = []
         for t in self.game.game_map.territories:
             territory_ids.append(t.id_)
-        num_troops = []
+            num_troops.append(t.troops)
+            player_ids_territory.append(
+                self.game.get_player_by_name(t.occupying_player_name).id_
+            )
+
+        continent_ids = []
+        continent_territories = []
 
 
 if __name__ == "__main__":

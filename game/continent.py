@@ -4,9 +4,10 @@ from game.territory import Territory
 
 class Continent:
     def __init__(
-        self, name, territories_name: list[Territory], troops_reward: int
+        self, name, id, territories_name: list[Territory], troops_reward: int
     ) -> None:
         self.name = name
+        self.id = id
         self.territories = territories_name
         self.troops_rewards = troops_reward
 

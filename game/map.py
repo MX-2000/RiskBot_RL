@@ -25,6 +25,11 @@ class Map:
         assert len(result) == 1
         return result[0]
 
+    def get_territory_from_id(self, id):
+        result = [t for t in self.territories if t.id == id]
+        assert len(result) == 1
+        return result[0]
+
     def update_continents(self, continents: list[Continent]):
         """
         Used at load time for convenience, after init

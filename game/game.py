@@ -255,7 +255,9 @@ class Game:
 
     def get_player_by_name(self, player_name):
         result = [p for p in self.players if p.name == player_name]
-        assert len(result) == 1
+        assert (
+            len(result) == 1
+        ), f"Can't get {player_name}. Players: {[p.name for p in self.players]}"
         return result[0]
 
     def has_valid_attack(self, player: Player):

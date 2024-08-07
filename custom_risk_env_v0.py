@@ -99,8 +99,10 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
 
 if __name__ == "__main__":
-    p1 = Player_Random("p1", 0)
-    p2 = Player_Random("p2", 1)
+    p1 = Player_Random("p1")
+    p2 = Player_Random("p2")
     game = Game("test_map_v0", [p1, p2])
+    game.init_players()
+    game.active_player = p1
     env = RiskEnv_Choice_is_attack_territory(game, render_mode=None)
-    print(env._get_obs)
+    print(env._get_obs())

@@ -97,6 +97,9 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             "connexions": connexions,
         }
 
+    def _get_info(self):
+        return
+
 
 if __name__ == "__main__":
     p1 = Player_Random("p1")

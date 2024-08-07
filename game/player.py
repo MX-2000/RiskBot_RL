@@ -4,8 +4,9 @@ from game.territory import Territory
 
 
 class Player:
-    def __init__(self, name) -> None:
+    def __init__(self, name, id_) -> None:
         self.name = name
+        self.id_ = id_
         self.controlled_territories: list[Territory] = []
         self.cards = None
         self.is_dead = False
@@ -66,8 +67,8 @@ class Player:
 
 
 class Player_Random(Player):
-    def __init__(self, name) -> None:
-        super().__init__(name)
+    def __init__(self, name, id_) -> None:
+        super().__init__(name, id_)
 
     def attack_wants_attack(self):
         # Random player always attack as long as it can
@@ -112,10 +113,10 @@ class Player_Random(Player):
 
 
 class Player_Human(Player):
-    def __init__(self, name) -> None:
-        super().__init__(name)
+    def __init__(self, name, id_) -> None:
+        super().__init__(name, id_)
 
 
 class Player_RL(Player):
-    def __init__(self, name) -> None:
-        super().__init__(name)
+    def __init__(self, name, id_) -> None:
+        super().__init__(name, id_)

@@ -66,9 +66,9 @@ def main():
     name_set = set()
     for i, player in enumerate(players_args):
         if player["is_bot"]:
-            p = Player_Random(player["name"])
+            p = Player_Random(player["name"], i)
         else:
-            p = Player_Human(player["name"])
+            p = Player_Human(player["name"], i)
         players.append(p)
         name_set.add(player["name"])
 

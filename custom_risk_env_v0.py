@@ -22,7 +22,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             {
                 "territory_ids": spaces.MultiDiscrete(
                     [num_territories for _ in range(num_territories)]
-                ),  # [1,....n] which can take values from 0 to n
+                ),  # Vector (n,) for territory id
                 "num_troops": spaces.MultiDiscrete(
                     [max_troops for _ in range(num_territories)]
                 ),  # Vector (n,) for number of troops
@@ -59,6 +59,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         territory_ids = []
         for t in self.game.game_map.territories:
             territory_ids.append(t.id_)
+        num_troops = []
 
 
 if __name__ == "__main__":

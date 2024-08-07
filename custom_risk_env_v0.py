@@ -37,6 +37,9 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         # We can only chose which territory to attack
         self.action_space = spaces.Discrete(len(self.game.game_map.territories))
 
+        assert render_mode is None or render_mode in self.metadata["render_modes"]
+        self.render_mode = render_mode
+
 
 if __name__ == "__main__":
     p1 = Player_Random("p1")

@@ -23,7 +23,6 @@ class Game:
         fixed: bool = True,
         true_random: bool = True,
     ) -> None:
-
         self.player_nb = len(players)
         self.players = players
         self.map_name = map_name
@@ -74,9 +73,15 @@ class Game:
         continents = []
         territories = []
 
+        # for ids
+        i = 0
+
         for name, t_data in map_metadata["territories"].items():
-            territory = Territory(name, t_data["adjacent_territories_ids"])
+            territory = Territory(name, i, t_data["adjacent_territories_ids"])
             territories.append(territory)
+            i += 1
+
+        i = 0
 
         game_map = Map(map_name, territories, continents)
 
@@ -86,9 +91,10 @@ class Game:
             ]
 
             continent = Continent(
-                name, c_territories, troops_reward=c_data["troops_reward"]
+                name, i, c_territories, troops_reward=c_data["troops_reward"]
             )
             continents.append(continent)
+            i += 1
 
         game_map.update_continents(continents)
 
@@ -108,7 +114,6 @@ class Game:
         troops_to_deploy = self.get_deployment_troops(player)
 
         while troops_to_deploy > 0:
-
             # Doing random for now. Need to plug in player methods.
             deploying = player.draft_choose_troops_to_deploy(troops_to_deploy)
             territory = player.draft_choose_territory_to_deploy()
@@ -283,9 +288,7 @@ class Game:
         remaining_players = self.players
 
         while len(remaining_players) > 1:
-
             for player in remaining_players:
-
                 if player.is_dead:
                     continue
 

@@ -25,8 +25,8 @@ class Map:
         assert len(result) == 1
         return result[0]
 
-    def get_territory_from_id(self, id):
-        result = [t for t in self.territories if t.id == id]
+    def get_territory_from_id(self, id_):
+        result = [t for t in self.territories if t.id_ == id_]
         assert len(result) == 1
         return result[0]
 

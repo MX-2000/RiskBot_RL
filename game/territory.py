@@ -1,7 +1,7 @@
 class Territory:
-    def __init__(self, name, id, adjacent_territories_ids: list[str]) -> None:
+    def __init__(self, name, id_, adjacent_territories_ids: list[str]) -> None:
         self.name = name
-        self.id = id
+        self.id_ = id_
         self.adjacent_territories_ids = adjacent_territories_ids
         self.troops = 0
         self.occupying_player_name = None

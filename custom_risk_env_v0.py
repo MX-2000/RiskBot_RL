@@ -14,6 +14,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         self.game = game
 
         num_territories = len(game.game_map.territories)
+        num_continents = len(game.game_map.continents)
         max_troops = 10e4
         num_players = game.player_nb
 
@@ -25,9 +26,19 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 "num_troops": spaces.MultiDiscrete(
                     [max_troops for _ in range(num_territories)]
                 ),  # Vector (n,) for number of troops
-                "player_ids": spaces.MultiDiscrete(
+                "player_ids_territory": spaces.MultiDiscrete(
                     [num_players for _ in range(num_territories)]
                 ),  # Vector (n,) for the assigned player id
+                "continent_ids": spaces.MultiDiscrete(
+                    [num_continents for _ in range(num_continents)]
+                ),  # Vector (j,) for j continents
+                "player_ids_continent": spaces.MultiDiscrete(
+                    [num_players for _ in range(num_continents)]
+                ),  # Vector(p,) for p players controlling each continent
+                "player": spaces.Discrete(num_players),  # Scalar - who is the player
+                "attacking_territory": spaces.Discrete(
+                    num_territories
+                ),  # Scalar - which territory are we attacking from
                 "connections": spaces.MultiBinary(
                     num_territories * num_territories
                 ),  # Flattened adjacency matrix
@@ -39,6 +50,15 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
+
+    def _get_obs(self):
+        """
+        Compute the observation state
+        """
+
+        territory_ids = []
+        for t in self.game.game_map.territories:
+            territory_ids.append(t.id_)
 
 
 if __name__ == "__main__":

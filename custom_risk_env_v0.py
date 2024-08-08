@@ -280,6 +280,17 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         return self._get_obs(), reward, terminated, False, self._get_info()
 
+    def render(self):
+        if self.render_mode == "human":
+            return self._render_frame()
+
+    def _render_frame(self):
+        if self.render_mode == "human":
+            self.game.render()
+
+    def close(self):
+        return
+
 
 if __name__ == "__main__":
     p1 = Player_Random("p1")

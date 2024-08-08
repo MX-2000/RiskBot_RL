@@ -131,3 +131,39 @@ class Player_Human(Player):
 class Player_RL(Player):
     def __init__(self, name) -> None:
         super().__init__(name)
+
+    def attack_wants_attack(self):
+        # Random player always attack as long as it can
+        return True
+
+    def draft_choose_troops_to_deploy(self, troops_to_deploy):
+        return random.randint(1, troops_to_deploy)
+
+    def draft_choose_territory_to_deploy(self) -> Territory:
+        return random.choice(self.controlled_territories)
+
+    def attack_choose_attack_territory(self):
+        raise NotImplementedError
+
+    def attack_choose_target_territory(self, attack_territory: Territory) -> str:
+        """
+        Return territory name
+        """
+        adjacent_territories = attack_territory.adjacent_territories_ids
+        # Target randomly an adjacent territory that isn't our own
+        try:
+            target = random.choice(
+                [
+                    t
+                    for t in adjacent_territories
+                    if t not in [p_t.name for p_t in self.controlled_territories]
+                ]
+            )
+            return target
+        except IndexError:
+            # all adjacent territories are player's
+            return
+
+    def attack_choose_attack_dices(self, attacker_troops):
+        # Random player always blitz with maximum troops
+        return min(3, attacker_troops), True

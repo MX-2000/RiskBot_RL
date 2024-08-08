@@ -1,4 +1,3 @@
-from networkx import is_attracting_component
 import numpy as np
 
 import gymnasium as gym

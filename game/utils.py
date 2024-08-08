@@ -1,6 +1,6 @@
 from loguru import logger
 
-from dice_rolls import roll_dices
+from game.dice_rolls import roll_dices
 
 
 def wait_for_cmd_action():

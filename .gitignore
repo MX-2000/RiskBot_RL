@@ -7,4 +7,4 @@ venv*/*
 */__pycache__/*
 game/maps/dum_map_repr_to_json.py
 
-risk_bots.egg-info/
+*.egg-info/

@@ -1,3 +1,4 @@
+from networkx import is_attracting_component
 import numpy as np
 
 import gymnasium as gym
@@ -102,7 +103,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         }
 
     def _get_info(self):
-        return
+        return {}
 
     def reset(self, seed=None, options=None):
         # We need the following line to seed self.np_random
@@ -140,8 +141,57 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             self.game.attacking_territory = attacker
 
     def step(self, action):
+        """
+        For now this is called right before choosing the target territory (action is target territory)
+        So everything else needs to be processed after applying the action, including:
+            - Running the rest of the player's turn
+            - Running other non agent turns
+            - Running the beginning of the agent turn (choosing attacker)
+        """
         done = False
         reward = 0
+
+        # The agent turn. This will always be called after choosing attacker
+        target_territory_id = action
+        target_territory = self.game.game_map.get_territory_from_id(target_territory_id)
+
+        attack_remaining, defender_remaining, dice_nb = self.game.perform_attack(
+            self.agent_player, self.game.attacking_territory, target_territory
+        )
+
+        attack_info = {
+            "attack_remaining": attack_remaining,
+            "defender_remaining": defender_remaining,
+            "target": target_territory,
+            "attacker": self.game.attacking_territory,
+            "player": self.agent_player,
+            "attack_dice_nb": dice_nb,
+        }
+        self.game.after_attack(attack_info=attack_info)
+
+        # If player keep attacking, we choose an attacker again and we return the state
+        if self.game.active_player.attack_wants_attack() and self.game.has_valid_attack(
+            self.game.active_player
+        ):
+            attacker = self.game.active_player.attack_choose_attack_territory()
+            self.game.attacking_territory = attacker
+            return self._get_obs(), reward, False, False, self._get_info()
+
+        # Else we check if game is over & we move on to the next phase
+        if self.game.is_game_over():
+            if self.game.remaining_players[0] == self.agent_player:
+                reward = WIN_GAME_REWARD
+            else:
+                reward = LOSE_GAME_REWARD
+
+            terminated = True
+            obs = self._get_obs()
+            return obs, reward, terminated, False, self._get_info()
+
+        self.game.next_phase()  # Useless for now
+        # TODO What do in reinforce phase?
+
+        self.game.next_turn()
 
         # Simulate other player's turns
         while self.game.active_player != self.agent_player:
@@ -159,12 +209,11 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
                 terminated = True
                 obs = self._get_obs()
-                return obs, reward, terminated, False, {}
+                return obs, reward, terminated, False, self._get_info()
 
             self.game.next_turn()
 
-        # Now is the agent turn
-
+        # It's back to the agent_player's turn again
         if self.game.game_phase == "DRAFT":
             troops_to_deploy = self.game.get_deployment_troops(self.game.active_player)
 
@@ -178,37 +227,26 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 territory = self.game.active_player.draft_choose_territory_to_deploy()
                 territory.add_troops(deploying)
                 troops_to_deploy -= deploying
+
+            # We are now in ATTACK phase
             self.game.next_phase()
+            # If the player can't attack or doesn't want to
+            if (
+                not self.game.active_player.attack_wants_attack()
+                or not self.game.has_valid_attack(self.game.active_player)
+            ):
+                # We should run the entire game loop again up to agent_player's turn
+                # This should never happen though, because the player will always deploy troops and for now we make it always want to attack
+                raise f"Error in current design"
 
-        elif self.game.game_phase == "ATTACK":
+            # We choose the attacking territory
+            attacker = self.game.active_player.attack_choose_attack_territory()
+            self.game.attacking_territory = attacker
 
-            # Still choosing most actions randomly
-            # TODO: choose here / initiate player attack phase
+        else:
+            raise f"Incorrect phase: {self.game.game_phase}"
 
-            target_territory_id = action
-            target_territory = self.game.game_map.get_territory_from_id(
-                target_territory_id
-            )
-
-            # TODO Simulate end of turn after attack
-            attack_remaining, defender_remaining, dice_nb = self.game.perform_attack(
-                self.agent_player, self.game.attacking_territory, target_territory
-            )
-
-            attack_info = {
-                "attack_remaining": attack_remaining,
-                "defender_remaining": defender_remaining,
-                "target": target_territory,
-                "attacker": self.game.attacking_territory,
-                "player": self.agent_player,
-                "attack_dice_nb": dice_nb,
-            }
-            self.game.after_attack(attack_info=attack_info)
-
-            # TODO simulate until next action
-            self.simulate_until_agents_action()
-        elif self.game.game_phase == "FORTIFY":
-            pass
+        return self._get_obs(), reward, terminated, False, self._get_info()
 
 
 if __name__ == "__main__":

@@ -65,6 +65,7 @@ class Game:
             self.active_player_idx = 0
 
         self.active_player = self.players[self.active_player_idx]
+        self.game_phase = "DRAFT"
         self.turn_number += 1
 
     def next_phase(self):

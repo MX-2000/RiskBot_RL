@@ -166,8 +166,20 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         # Now is the agent turn
 
         if self.game.game_phase == "DRAFT":
-            # TODO: Currently choosing randomly anyways
-            pass
+            troops_to_deploy = self.game.get_deployment_troops(self.game.active_player)
+
+            while (
+                troops_to_deploy > 0
+            ):  # To be replaced whenever the player will actually choose
+                # Doing random for now. Need to plug in player methods.
+                deploying = self.game.active_player.draft_choose_troops_to_deploy(
+                    troops_to_deploy
+                )
+                territory = self.game.active_player.draft_choose_territory_to_deploy()
+                territory.add_troops(deploying)
+                troops_to_deploy -= deploying
+            self.game.next_phase()
+
         elif self.game.game_phase == "ATTACK":
 
             # Still choosing most actions randomly

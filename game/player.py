@@ -67,13 +67,13 @@ class Player:
     def attack_choose_transfert_nb(self) -> bool:
         raise NotImplementedError
 
-    def reinforce_choose_from(self):
+    def fortify_choose_from(self):
         raise NotImplementedError
 
-    def reinforce_choose_to(self):
+    def fortify_choose_to(self):
         raise NotImplementedError
 
-    def reinforce_choose_troops_nb(self):
+    def fortify_choose_troops_nb(self):
         raise NotImplementedError
 
 

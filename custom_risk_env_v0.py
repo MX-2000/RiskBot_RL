@@ -147,7 +147,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         while self.game.active_player != self.agent_player:
             self.game.draft_phase(self.game.active_player)
             self.game.attack_phase(self.game.active_player)
-            # self.game.reinforce_phase(self.game.active_player)
+            # self.game.fortify_phase(self.game.active_player)
             # self.game.card_phase(self.game.active_player)
 
             # Check if the game ended during another player's turn
@@ -163,14 +163,15 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
             self.game.next_turn()
 
+        # Now is the agent turn
+
         if self.game.game_phase == "DRAFT":
+            # TODO: Currently choosing randomly anyways
             pass
         elif self.game.game_phase == "ATTACK":
-            assert (
-                self.game.game_phase == "ATTACK"
-                and self.game.attacking_territory
-                and self.game.active_player == self.agent_player
-            ), f"Wrong state condition for taking action"
+
+            # Still choosing most actions randomly
+            # TODO: choose here / initiate player attack phase
 
             target_territory_id = action
             target_territory = self.game.game_map.get_territory_from_id(

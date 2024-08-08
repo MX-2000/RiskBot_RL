@@ -67,6 +67,14 @@ class Game:
         self.active_player = self.players[self.active_player_idx]
         self.turn_number += 1
 
+    def next_phase(self):
+        if self.game_phase == "DRAFT":
+            self.game_phase = "ATTACK"
+        elif self.game_phase == "ATTACK":
+            self.game_phase == "FORTIFY"
+        elif self.game_phase == "FORTIFY":
+            self.game_phase = "DRAFT"
+
     def render(self):
         """
         Render game state on screen
@@ -389,7 +397,7 @@ class Game:
                 return True
         return False
 
-    def reinforce_phase(self, player):
+    def fortify_phase(self, player):
         self.game_phase = "FORTIFY"
 
         pass
@@ -416,7 +424,7 @@ class Game:
 
                 self.draft_phase(player)
                 self.attack_phase(player)
-                # self.reinforce_phase(player)
+                # self.fortify_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)
                 # self.card_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)
@@ -451,7 +459,7 @@ class Game:
                 self.attack_phase(player)
 
                 self.render()
-                # self.reinforce_phase(player)
+                # self.fortify_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)
                 # self.card_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)

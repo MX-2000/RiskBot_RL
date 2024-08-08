@@ -111,8 +111,58 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         self.game.reset()
 
-        # We simulate the game until it's the agent's turn
-        self.simulate_until_agents_action()
+        # Simulate other player's turns
+        while self.game.active_player != self.agent_player:
+            self.game.draft_phase(self.game.active_player)
+            self.game.attack_phase(self.game.active_player)
+            # self.game.fortify_phase(self.game.active_player)
+            # self.game.card_phase(self.game.active_player)
+
+            # Check if the game ended during another player's turn
+            if self.game.is_game_over():
+                if self.game.remaining_players[0] == self.agent_player:
+                    reward = WIN_GAME_REWARD
+                else:
+                    reward = LOSE_GAME_REWARD
+
+                terminated = True
+                obs = self._get_obs()
+                return obs, reward, terminated, False, self._get_info()
+
+            self.game.next_turn()
+
+        # It's back to the agent_player's turn again
+        if self.game.game_phase == "DRAFT":
+            troops_to_deploy = self.game.get_deployment_troops(self.game.active_player)
+
+            while (
+                troops_to_deploy > 0
+            ):  # To be replaced whenever the player will actually choose
+                # Doing random for now. Need to plug in player methods.
+                deploying = self.game.active_player.draft_choose_troops_to_deploy(
+                    troops_to_deploy
+                )
+                territory = self.game.active_player.draft_choose_territory_to_deploy()
+                territory.add_troops(deploying)
+                troops_to_deploy -= deploying
+
+            # We are now in ATTACK phase
+            self.game.next_phase()
+            # If the player can't attack or doesn't want to
+            if (
+                not self.game.active_player.attack_wants_attack()
+                or not self.game.has_valid_attack(self.game.active_player)
+            ):
+                # We should run the entire game loop again up to agent_player's turn
+                # This should never happen though, because the player will always deploy troops and for now we make it always want to attack
+                raise f"Error in current design"
+
+            # We choose the attacking territory
+            attacker = self.game.active_player.attack_choose_attack_territory()
+            self.game.attacking_territory = attacker
+
+        else:
+            raise f"Incorrect phase: {self.game.game_phase}"
 
         observation = self._get_obs()
         info = self._get_info()
@@ -121,24 +171,6 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             self._render_frame()
 
         return observation, info
-
-    def simulate_until_agents_action(self):
-        if self.game.is_game_over():
-            return
-
-        while self.game.active_player != self.agent_player:
-            self.game.play_turns()
-
-        # Simulate up to the choice of attacking territory
-        time_remaining = 100
-        while time_remaining > 0 and len(self.game.get_remaining_players()) > 1:
-            if not self.game.has_valid_attack(self.agent_player):
-                break
-            if not self.agent_player.attack_wants_attack():
-                break
-
-            attacker = self.agent_player.attack_choose_attack_territory()
-            self.game.attacking_territory = attacker
 
     def step(self, action):
         """

@@ -61,6 +61,12 @@ class Player:
         """
         raise NotImplementedError
 
+    def attack_choose_blitz(self) -> bool:
+        raise NotImplementedError
+
+    def attack_choose_transfert_nb(self) -> bool:
+        raise NotImplementedError
+
     def reinforce_choose_from(self):
         raise NotImplementedError
 

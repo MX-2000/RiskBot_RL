@@ -6,6 +6,9 @@ from gymnasium import spaces
 from game.game import Game
 from game.player import Player, Player_Random
 
+LOSE_GAME_REWARD = -1e10
+WIN_GAME_REWARD = 1e10
+
 
 class RiskEnv_Choice_is_attack_territory(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 0}
@@ -119,16 +122,62 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         return observation, info
 
     def simulate_until_agents_action(self):
+        if self.game.is_game_over():
+            return
+
         while self.game.active_player != self.agent_player:
             self.game.play_turns()
 
+        # Simulate up to the choice of attacking territory
+        time_remaining = 100
+        while time_remaining > 0 and len(self.game.get_remaining_players()) > 1:
+            if not self.game.has_valid_attack(self.agent_player):
+                break
+            if not self.agent_player.attack_wants_attack():
+                break
+
+            attacker = self.agent_player.attack_choose_attack_territory()
+            self.game.attacking_territory = attacker
+
     def step(self, action):
-        done = False
+        done = self.game.is_game_over()
         reward = 0
 
-        # TODO take action
+        if done:
+            if self.game.remaining_players[0] == self.agent_player:
+                reward = WIN_GAME_REWARD
+            else:
+                reward = LOSE_GAME_REWARD
+        else:
+            # TODO take action - only choosing which territory to attack
+            assert (
+                self.game.game_phase == "ATTACK"
+                and self.game.attacking_territory
+                and self.game.active_player == self.agent_player
+            ), f"Wrong state condition for taking action"
 
-        # TODO simulate until next turn
+            target_territory_id = action
+            target_territory = self.game.game_map.get_territory_from_id(
+                target_territory_id
+            )
+
+            # TODO Simulate end of turn after attack
+            attack_remaining, defender_remaining, dice_nb = self.game.perform_attack(
+                self.agent_player, self.game.attacking_territory, target_territory
+            )
+
+            attack_info = {
+                "attack_remaining": attack_remaining,
+                "defender_remaining": defender_remaining,
+                "target": target_territory,
+                "attacker": self.game.attacking_territory,
+                "player": self.agent_player,
+                "attack_dice_nb": dice_nb,
+            }
+            self.game.after_attack(attack_info=attack_info)
+
+            # TODO simulate until next action
+            self.simulate_until_agents_action()
 
 
 if __name__ == "__main__":

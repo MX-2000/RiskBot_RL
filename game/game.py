@@ -9,8 +9,8 @@ from game.player import Player
 from game.map import Map
 from game.territory import Territory
 from game.continent import Continent
-from game.utils import wait_for_cmd_action
-from game.dice_rolls import roll_dices, roll_dices_sanity_checks
+from game.utils import wait_for_cmd_action, attack_once
+from game.dice_rolls import roll_dices_sanity_checks
 
 PAUSE_BTW_ACTIONS = 2
 
@@ -164,6 +164,93 @@ class Game:
         )
         return result
 
+    def setup_attack_phase(self, player: Player):
+        self.game_phase = "ATTACK"
+
+        if not self.has_valid_attack(player):
+            return
+
+    def perform_attack(self, player: Player, attacker: Territory, target: Territory):
+        attack_dice_nb, blitz = player.attack_choose_attack_dices(attacker.troops)
+
+        # Sanity checks
+        is_valid = roll_dices_sanity_checks(player, attacker, target, attack_dice_nb)
+        logger.debug(
+            f"{player.name} trying to attack from {attacker.name} to {target.name} with {attack_dice_nb} troops. Blitz? {blitz}"
+        )
+        time.sleep(PAUSE_BTW_ACTIONS)
+        if not is_valid:
+            return
+
+        defender_remaining = target.troops
+
+        if blitz:
+            while defender_remaining > 0 and attack_dice_nb > 0:
+                if not roll_dices_sanity_checks(
+                    player, attacker, target, attack_dice_nb
+                ):
+                    attack_dice_nb -= 1
+                    continue
+                attacker_loss, defender_loss = attack_once(
+                    player, attacker, target, attack_dice_nb, self.true_random
+                )
+                attack_remaining = attacker.remove_troops(attacker_loss)
+                defender_remaining = target.remove_troops(defender_loss)
+                logger.debug(
+                    f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
+                )
+                time.sleep(PAUSE_BTW_ACTIONS)
+
+        else:
+            attacker_loss, defender_loss = attack_once(
+                player, attacker, target, attack_dice_nb, self.true_random
+            )
+            attack_remaining = attacker.remove_troops(attacker_loss)
+            defender_remaining = target.remove_troops(defender_loss)
+            logger.debug(f"Remaining: A: {attack_remaining}, D: {defender_remaining}")
+            time.sleep(PAUSE_BTW_ACTIONS)
+
+        return attack_remaining, defender_remaining, attack_dice_nb
+
+    def after_attack(self, attack_info: dict):
+        (
+            attack_remaining,
+            defender_remaining,
+            target,
+            attacker,
+            player,
+            attack_dice_nb,
+        ) = (
+            attack_info["attack_remaining"],
+            attack_info["defender_remaining"],
+            attack_info["target"],
+            attack_info["attacker"],
+            attack_info["player"],
+            attack_info["attack_dice_nb"],
+        )
+        if defender_remaining == 0:
+            logger.debug(f"Territory got conquered, transferring troops and ownership")
+            # Update ownership
+            target_player = self.get_player_by_name(target.occupying_player_name)
+            target_player.remove_territory(target)
+            player.assign_territory(target)
+
+            # Move attaker troops
+            # We move a minimum of (remaining_troops -1, attack_dice_nb)
+            min_to_move = min(attack_dice_nb, attack_remaining - 1)
+            max_to_move = attack_remaining - 1
+
+            # For now we move the maximum we can
+            mooving = max_to_move
+            attacker.remove_troops(mooving)
+            target.add_troops(mooving)
+
+            # If we killed the target
+            if len(target_player.controlled_territories) == 0:
+                target_player.is_dead = True
+
+                # TODO transfer cards
+
     def attack_phase(self, player: Player):
         """
         For bot so far: choose randomly 1 territory to attack another
@@ -171,7 +258,6 @@ class Game:
         """
         self.game_phase = "ATTACK"
 
-        # TODO
         if not self.has_valid_attack(player):
             print(f"You do not have any valid attack")
             return
@@ -189,7 +275,6 @@ class Game:
             # ***
             target_name = player.attack_choose_target_territory(attacker)
             target = self.game_map.get_territory_from_name(target_name)
-            self.attack()
             # ***
 
             attack_dice_nb, blitz = player.attack_choose_attack_dices(attacker.troops)
@@ -206,18 +291,6 @@ class Game:
                 continue
 
             defender_remaining = target.troops
-
-            def attack_once(player, attacker, target, attack_dice_nb, true_random):
-                logger.debug(
-                    f"{player.name} Attacking from {attacker.name} to {target.name} with {attack_dice_nb} dices."
-                )
-                attacker_loss, defender_loss = roll_dices(
-                    player, attacker, target, attack_dice_nb, true_random
-                )
-                logger.debug(
-                    f"Attacker lost {attacker_loss}, Defender lost {defender_loss}"
-                )
-                return attacker_loss, defender_loss
 
             if blitz:
                 while defender_remaining > 0 and attack_dice_nb > 0:

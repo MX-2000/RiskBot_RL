@@ -140,16 +140,32 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             self.game.attacking_territory = attacker
 
     def step(self, action):
-        done = self.game.is_game_over()
+        done = False
         reward = 0
 
-        if done:
-            if self.game.remaining_players[0] == self.agent_player:
-                reward = WIN_GAME_REWARD
-            else:
-                reward = LOSE_GAME_REWARD
-        else:
-            # TODO take action - only choosing which territory to attack
+        # Simulate other player's turns
+        while self.game.active_player != self.agent_player:
+            self.game.draft_phase(self.game.active_player)
+            self.game.attack_phase(self.game.active_player)
+            # self.game.reinforce_phase(self.game.active_player)
+            # self.game.card_phase(self.game.active_player)
+
+            # Check if the game ended during another player's turn
+            if self.game.is_game_over():
+                if self.game.remaining_players[0] == self.agent_player:
+                    reward = WIN_GAME_REWARD
+                else:
+                    reward = LOSE_GAME_REWARD
+
+                terminated = True
+                obs = self._get_obs()
+                return obs, reward, terminated, False, {}
+
+            self.game.next_turn()
+
+        if self.game.game_phase == "DRAFT":
+            pass
+        elif self.game.game_phase == "ATTACK":
             assert (
                 self.game.game_phase == "ATTACK"
                 and self.game.attacking_territory
@@ -178,6 +194,8 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
             # TODO simulate until next action
             self.simulate_until_agents_action()
+        elif self.game.game_phase == "FORTIFY":
+            pass
 
 
 if __name__ == "__main__":

@@ -33,6 +33,7 @@ class Game:
         self.turn_number = 1
         self.game_phase = None
         self.active_player = None
+        self.active_player_idx = None
 
         # Usefull to construct observation space
         self.attacking_territory = None
@@ -56,6 +57,15 @@ class Game:
     def _set_players_id(self):
         for i, p in enumerate(self.players):
             p.id_ = i
+
+    def next_turn(self):
+
+        self.active_player_idx += 1
+        if self.active_player_idx >= len(self.players):
+            self.active_player_idx = 0
+
+        self.active_player = self.players[self.active_player_idx]
+        self.turn_number += 1
 
     def render(self):
         """
@@ -345,6 +355,8 @@ class Game:
 
                     # TODO transfer cards
 
+        self.attacking_territory = None
+
     def attack(self, player: Player):
         pass
 
@@ -404,7 +416,6 @@ class Game:
 
                 self.draft_phase(player)
                 self.attack_phase(player)
-                self.attacking_territory = None
                 # self.reinforce_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)
                 # self.card_phase(player)
@@ -439,8 +450,6 @@ class Game:
                 wait_for_cmd_action()
                 self.attack_phase(player)
 
-                self.attacking_territory = None
-
                 self.render()
                 # self.reinforce_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)
@@ -463,11 +472,15 @@ class Game:
         """
         Based on the map & the player number:
             - shuffle the order
+            - init active players
             - attribute a starting troop number to each player
             - randomly assigns territories to each player with 1 troop
             - randomly assigns the remaining troops to each territory
         """
         random.shuffle(self.players)
+
+        self.active_player = self.players[0]
+        self.active_player_idx = 0
 
         starting_troops = 40 - (len(self.players) - 2) * 5
 

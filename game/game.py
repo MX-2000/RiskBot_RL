@@ -524,7 +524,7 @@ class Game:
     def __str__(self):
         result = f"MAP {self.map_name}"
         for p in self.players:
-            result += f"\nP: {p.name}"
+            result += f"\nP: {p.name} {p.__class__.__name__}"
         for territory in self.game_map.territories:
             terr_rep = f"\n{territory.name}|{territory.id_} - {territory.occupying_player_name} - {territory.troops} troops. Linked to {territory.adjacent_territories_ids}"
             result += terr_rep

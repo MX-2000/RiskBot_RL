@@ -1,7 +1,12 @@
+import os
+
 import numpy as np
 
 import gymnasium as gym
 from gymnasium import spaces
+from loguru import logger
+
+logger.add(os.path.join(os.path.dirname(os.path.abspath(__file__)), f"env.log"))
 
 from game.game import Game
 from game.player import Player, Player_Random
@@ -54,6 +59,8 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
+
+        logger.debug(self.game)
 
     def _get_obs(self):
         """

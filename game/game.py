@@ -5,6 +5,7 @@ import random
 
 from loguru import logger
 
+
 from game.player import Player
 from game.map import Map
 from game.territory import Territory
@@ -518,3 +519,12 @@ class Game:
                 t = random.choice(player.controlled_territories)
                 t.add_troops(1)
                 p_remaining_troops -= 1
+
+    def __str__(self):
+        result = f"MAP {self.map_name}"
+        for p in self.players:
+            result += f"\nP: {p.name}"
+        for territory in self.game_map.territories:
+            terr_rep = f"\n{territory.name}|{territory.id_} - {territory.occupying_player_name} - {territory.troops} troops. Linked to {territory.adjacent_territories_ids}"
+            result += terr_rep
+        return result

@@ -163,7 +163,7 @@ class Game:
             territory.add_troops(deploying)
             troops_to_deploy -= deploying
             print(f"{player.name} deployed {deploying} troops in {territory.name}")
-            time.sleep(PAUSE_BTW_ACTIONS)
+            # time.sleep(PAUSE_BTW_ACTIONS)
 
     def get_deployment_troops(self, player: Player, card_troops=0):
         """
@@ -198,7 +198,7 @@ class Game:
         logger.debug(
             f"{player.name} trying to attack from {attacker.name} to {target.name} with {attack_dice_nb} troops. Blitz? {blitz}"
         )
-        time.sleep(PAUSE_BTW_ACTIONS)
+        # time.sleep(PAUSE_BTW_ACTIONS)
         if not is_valid:
             return
 
@@ -219,7 +219,7 @@ class Game:
                 logger.debug(
                     f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
                 )
-                time.sleep(PAUSE_BTW_ACTIONS)
+                # time.sleep(PAUSE_BTW_ACTIONS)
 
         else:
             attacker_loss, defender_loss = attack_once(
@@ -228,7 +228,7 @@ class Game:
             attack_remaining = attacker.remove_troops(attacker_loss)
             defender_remaining = target.remove_troops(defender_loss)
             logger.debug(f"Remaining: A: {attack_remaining}, D: {defender_remaining}")
-            time.sleep(PAUSE_BTW_ACTIONS)
+            # time.sleep(PAUSE_BTW_ACTIONS)
 
         return attack_remaining, defender_remaining, attack_dice_nb
 
@@ -306,7 +306,7 @@ class Game:
             logger.debug(
                 f"{player.name} trying to attack from {attacker.name} to {target.name} with {attack_dice_nb} troops. Blitz? {blitz}"
             )
-            time.sleep(PAUSE_BTW_ACTIONS)
+            # time.sleep(PAUSE_BTW_ACTIONS)
             if not is_valid:
                 continue
 
@@ -327,7 +327,7 @@ class Game:
                     logger.debug(
                         f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
                     )
-                    time.sleep(PAUSE_BTW_ACTIONS)
+                    # time.sleep(PAUSE_BTW_ACTIONS)
 
             else:
                 attacker_loss, defender_loss = attack_once(
@@ -338,7 +338,7 @@ class Game:
                 logger.debug(
                     f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
                 )
-                time.sleep(PAUSE_BTW_ACTIONS)
+                # time.sleep(PAUSE_BTW_ACTIONS)
 
             if defender_remaining == 0:
                 logger.debug(
@@ -487,6 +487,7 @@ class Game:
             - randomly assigns territories to each player with 1 troop
             - randomly assigns the remaining troops to each territory
         """
+        logger.debug(f"Called")
         random.shuffle(self.players)
 
         self.active_player = self.players[0]

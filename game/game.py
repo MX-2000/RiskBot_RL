@@ -54,6 +54,7 @@ class Game:
             p.reset()
         self.init_players()
         self.remaining_players = self.players
+        self.game_phase = "DRAFT"
 
     def _set_players_id(self):
         for i, p in enumerate(self.players):
@@ -68,6 +69,7 @@ class Game:
         self.active_player = self.players[self.active_player_idx]
         self.game_phase = "DRAFT"
         self.turn_number += 1
+        logger.debug(f"Player turn: {self.active_player}")
 
     def next_phase(self):
         if self.game_phase == "DRAFT":
@@ -76,6 +78,8 @@ class Game:
             self.game_phase == "FORTIFY"
         elif self.game_phase == "FORTIFY":
             self.game_phase = "DRAFT"
+
+        logger.debug(f"Phase: {self.game_phase}")
 
     def render(self):
         """

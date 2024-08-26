@@ -155,6 +155,9 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 territory = self.game.active_player.draft_choose_territory_to_deploy()
                 territory.add_troops(deploying)
                 troops_to_deploy -= deploying
+                logger.debug(
+                    f"{self.game.active_player.name} deployed {deploying} troops in {territory.name}"
+                )
 
             # We are now in ATTACK phase
             self.game.next_phase()

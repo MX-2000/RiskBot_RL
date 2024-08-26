@@ -148,7 +148,12 @@ class Player_RL(Player):
         return random.choice(self.controlled_territories)
 
     def attack_choose_attack_territory(self):
-        raise NotImplementedError
+        t_with_more_than_one_troop = [
+            t for t in self.controlled_territories if t.troops > 1
+        ]
+        if len(t_with_more_than_one_troop) == 0:
+            return
+        return np.random.choice(t_with_more_than_one_troop)
 
     def attack_choose_target_territory(self, attack_territory: Territory) -> str:
         """

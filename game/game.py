@@ -166,7 +166,9 @@ class Game:
             territory = player.draft_choose_territory_to_deploy()
             territory.add_troops(deploying)
             troops_to_deploy -= deploying
-            print(f"{player.name} deployed {deploying} troops in {territory.name}")
+            logger.debug(
+                f"{player.name} deployed {deploying} troops in {territory.name}"
+            )
             # time.sleep(PAUSE_BTW_ACTIONS)
 
     def get_deployment_troops(self, player: Player, card_troops=0):

@@ -89,7 +89,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         continent_territories = []  # Binaries of length num_territories
         for c in self.game.game_map.continents:
             continent_ids.append(c.id_)
-            c_territories = [0] * len(game.game_map.territories)
+            c_territories = [0] * len(self.game.game_map.territories)
             c_terr_ids = [t.id_ for t in c.territories]
             for idx in c_terr_ids:
                 c_territories[idx] = 1

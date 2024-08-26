@@ -119,7 +119,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         self.game.reset()
 
-        logger.debug(f"Player turn: {self.game.active_player}")
+        logger.debug(f"Player turn: {self.game.active_player.name}")
 
         # Simulate other player's turns
         while self.game.active_player != self.agent_player:

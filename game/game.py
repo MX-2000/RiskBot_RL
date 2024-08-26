@@ -69,7 +69,7 @@ class Game:
         self.active_player = self.players[self.active_player_idx]
         self.game_phase = "DRAFT"
         self.turn_number += 1
-        logger.debug(f"Player turn: {self.active_player}")
+        logger.debug(f"Player turn: {self.active_player.name}")
 
     def next_phase(self):
         if self.game_phase == "DRAFT":

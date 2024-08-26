@@ -97,17 +97,17 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         player = self.game.active_player.id_
 
-        attacking_territory = self.game.attacking_territory
+        attacking_territory = self.game.attacking_territory.id_
 
         return {
-            "territory_ids": territory_ids,
-            "num_troops": num_troops,
-            "player_ids_territory": player_ids_territory,
-            "continent_ids": continent_ids,
-            "continent_territories": continent_territories,
+            "territory_ids": np.array(territory_ids),
+            "num_troops": np.array(num_troops),
+            "player_ids_territory": np.array(player_ids_territory),
+            "continent_ids": np.array(continent_ids),
+            "continent_territories": np.array(continent_territories),
             "player": player,
             "attacking_territory": attacking_territory,
-            "connexions": connexions,
+            "connexions": np.array(connexions),
         }
 
     def _get_info(self):
@@ -137,10 +137,11 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
                 terminated = True
                 obs = self._get_obs()
-                return obs, reward, terminated, False, self._get_info()
+                return obs, self._get_info()
 
             self.game.next_turn()
 
+        logger.debug("RL Player turn")
         # It's back to the agent_player's turn again
         if self.game.game_phase == "DRAFT":
             troops_to_deploy = self.game.get_deployment_troops(self.game.active_player)
@@ -173,6 +174,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             # We choose the attacking territory
             attacker = self.game.active_player.attack_choose_attack_territory()
             self.game.attacking_territory = attacker
+            logger.debug(f"RL player chose {attacker.name} as attacker territory.")
 
         else:
             raise f"Incorrect phase: {self.game.game_phase}"

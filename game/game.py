@@ -282,10 +282,11 @@ class Game:
         For bot so far: choose randomly 1 territory to attack another
         The sanity checks are out of the random choice, for later implementation
         """
+        logger.debug(f"Called on {player.name}")
         self.game_phase = "ATTACK"
 
         if not self.has_valid_attack(player):
-            print(f"You do not have any valid attack")
+            logger.debug(f"You do not have any valid attack")
             return
 
         time_remaining = 100  # TODO: implement time function at some point
@@ -293,6 +294,7 @@ class Game:
             if not self.has_valid_attack(player):
                 break
             if not player.attack_wants_attack():
+                logger.debug(f"Player does not want to attack")
                 break
 
             attacker = player.attack_choose_attack_territory()

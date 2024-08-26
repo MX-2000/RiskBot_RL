@@ -90,6 +90,8 @@ class Player_Random(Player):
 
     def draft_choose_troops_to_deploy(self, troops_to_deploy):
         logger.debug(f"To deploy: {troops_to_deploy}")
+        if troops_to_deploy == 1:
+            return 1
         return np.random.randint(1, troops_to_deploy)
 
     def draft_choose_territory_to_deploy(self) -> Territory:
@@ -142,7 +144,10 @@ class Player_RL(Player):
         return True
 
     def draft_choose_troops_to_deploy(self, troops_to_deploy):
-        return random.randint(1, troops_to_deploy)
+        logger.debug(f"To deploy: {troops_to_deploy}")
+        if troops_to_deploy == 1:
+            return 1
+        return np.random.randint(1, troops_to_deploy)
 
     def draft_choose_territory_to_deploy(self) -> Territory:
         return random.choice(self.controlled_territories)

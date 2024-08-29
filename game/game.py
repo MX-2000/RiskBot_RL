@@ -124,7 +124,7 @@ class Game:
         i = 0
 
         for name, t_data in map_metadata["territories"].items():
-            territory = Territory(name, i, t_data["adjacent_territories_ids"])
+            territory = Territory(name, i, t_data["adjacent_territories_names"])
             territories.append(territory)
             i += 1
 
@@ -307,6 +307,9 @@ class Game:
 
             attack_dice_nb, blitz = player.attack_choose_attack_dices(attacker.troops)
 
+            if blitz:
+                attack_dice_nb = min(attacker.troops, 3)
+
             # Sanity checks
             is_valid = roll_dices_sanity_checks(
                 player, attacker, target, attack_dice_nb
@@ -396,7 +399,7 @@ class Game:
 
         # If any has an adjacent territory that isn't controlled by player, then we have a valid attack possible
         for t in potential_attack_t:
-            adjacent_territories_names = t.adjacent_territories_ids
+            adjacent_territories_names = t.adjacent_territories_names
             if any(
                 [
                     adj_terr_name
@@ -534,6 +537,6 @@ class Game:
         for p in self.players:
             result += f"\nP: {p.name} {p.__class__.__name__}"
         for territory in self.game_map.territories:
-            terr_rep = f"\n{territory.name}|{territory.id_} - {territory.occupying_player_name} - {territory.troops} troops. Linked to {territory.adjacent_territories_ids}"
+            terr_rep = f"\n{territory.name}|{territory.id_} - {territory.occupying_player_name} - {territory.troops} troops. Linked to {territory.adjacent_territories_names}"
             result += terr_rep
         return result

@@ -45,7 +45,7 @@ def test_sanity_checks():
 
     # Target not connected
     target.occupying_player_name = "p2"
-    attack_terr.adjacent_territories_ids = ["other"]
+    attack_terr.adjacent_territories_names = ["other"]
     assert (
         roll_dices_sanity_checks(attack_player, attack_terr, target, attack_dice)
         == False

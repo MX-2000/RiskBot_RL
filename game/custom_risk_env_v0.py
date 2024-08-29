@@ -80,7 +80,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 self.game.get_player_by_name(t.occupying_player_name).id_
             )
             t_connexions = [0] * len(self.game.game_map.territories)
-            for t_name in t.adjacent_territories_ids:
+            for t_name in t.adjacent_territories_names:
                 t_id = self.game.game_map.get_territory_from_name(t_name).id_
                 t_connexions[t_id] = 1
             connexions.extend(t_connexions)
@@ -197,11 +197,11 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         attacking_player = self.agent_player
         attacker = self.game.attacking_territory
 
-        adjacent_territories = attacker.adjacent_territories_ids
+        adjacent_territories = attacker.adjacent_territories_names
         valid_actions = [
             t
             for t in adjacent_territories
-            if self.game.game_map.get_territory_from_id(t).occupying_player_name
+            if self.game.game_map.get_territory_from_name(t).occupying_player_name
             != attacking_player.name
         ]
         return valid_actions

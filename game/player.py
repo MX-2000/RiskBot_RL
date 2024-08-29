@@ -109,7 +109,7 @@ class Player_Random(Player):
         """
         Return territory name
         """
-        adjacent_territories = attack_territory.adjacent_territories_ids
+        adjacent_territories = attack_territory.adjacent_territories_names
         # Target randomly an adjacent territory that isn't our own
         try:
             target = np.random.choice(
@@ -125,9 +125,10 @@ class Player_Random(Player):
             return
 
     def attack_choose_attack_dices(self, attacker_troops):
-        return min(np.random.randint(1, 4), attacker_troops), np.random.choice(
-            [True, False]
-        )
+        # return min(np.random.randint(1, 4), attacker_troops), np.random.choice(
+        #     [True, False]
+        # )
+        return min(np.random.randint(1, 4), attacker_troops), True
 
 
 class Player_Human(Player):
@@ -164,7 +165,7 @@ class Player_RL(Player):
         """
         Return territory name
         """
-        adjacent_territories = attack_territory.adjacent_territories_ids
+        adjacent_territories = attack_territory.adjacent_territories_names
         # Target randomly an adjacent territory that isn't our own
         try:
             target = random.choice(

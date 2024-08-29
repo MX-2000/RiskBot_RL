@@ -277,6 +277,10 @@ class Game:
 
                 # TODO transfer cards
 
+        self.remaining_players = [
+            player for player in self.players if not player.is_dead
+        ]
+
     def attack_phase(self, player: Player):
         """
         For bot so far: choose randomly 1 territory to attack another

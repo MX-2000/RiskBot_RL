@@ -197,12 +197,15 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         attacking_player = self.agent_player
         attacker = self.game.attacking_territory
 
-        adjacent_territories = attacker.adjacent_territories_names
+        adjacent_territories_names = attacker.adjacent_territories_names
+        adjacent_territories = [
+            self.game.game_map.get_territory_from_name(t)
+            for t in adjacent_territories_names
+        ]
         valid_actions = [
-            t
+            t.id_
             for t in adjacent_territories
-            if self.game.game_map.get_territory_from_name(t).occupying_player_name
-            != attacking_player.name
+            if t.occupying_player_name != attacking_player.name
         ]
         return valid_actions
 
@@ -217,10 +220,13 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         masked_action_space = self.get_masked_action_space()
 
+        logger.debug(
+            f"{[f'{t.name}, {t.id_}' for t in self.game.game_map.territories]}"
+        )
         logger.debug(f"Action: {action}")
         logger.debug(f"Valid actions: {masked_action_space}")
 
-        if action in masked_action_space:
+        if action not in masked_action_space:
             raise ValueError(f"Invalid action {action} selected.")
 
         done = False

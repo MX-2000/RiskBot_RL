@@ -180,5 +180,5 @@ class Player_RL(Player):
             return
 
     def attack_choose_attack_dices(self, attacker_troops):
-        # Random player always blitz with maximum troops
+        # RL player always blitz with maximum troops
         return min(3, attacker_troops), True

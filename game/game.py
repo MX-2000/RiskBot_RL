@@ -380,6 +380,10 @@ class Game:
 
                     # TODO transfer cards
 
+                self.remaining_players = [
+                    player for player in self.players if not player.is_dead
+                ]
+
         self.attacking_territory = None
 
     def attack(self, player: Player):

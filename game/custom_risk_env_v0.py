@@ -218,37 +218,41 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             - Running the beginning of the agent turn (choosing attacker)
         """
 
-        masked_action_space = self.get_masked_action_space()
+        if self.game.has_valid_attack(self.game.active_player):
 
-        logger.debug(
-            f"{[f'{t.name}, {t.id_}' for t in self.game.game_map.territories]}"
-        )
-        logger.debug(f"Action: {action}")
-        logger.debug(f"Valid actions: {masked_action_space}")
+            masked_action_space = self.get_masked_action_space()
 
-        if action not in masked_action_space:
-            raise ValueError(f"Invalid action {action} selected.")
+            logger.debug(
+                f"{[f'{t.name}, {t.id_}' for t in self.game.game_map.territories]}"
+            )
+            logger.debug(f"Action: {action}")
+            logger.debug(f"Valid actions: {masked_action_space}")
 
-        done = False
-        reward = 0
+            if action not in masked_action_space:
+                raise ValueError(f"Invalid action {action} selected.")
 
-        # The agent turn. This will always be called after choosing attacker
-        target_territory_id = action
-        target_territory = self.game.game_map.get_territory_from_id(target_territory_id)
+            done = False
+            reward = 0
 
-        attack_remaining, defender_remaining, dice_nb = self.game.perform_attack(
-            self.agent_player, self.game.attacking_territory, target_territory
-        )
+            # The agent turn. This will always be called after choosing attacker
+            target_territory_id = action
+            target_territory = self.game.game_map.get_territory_from_id(
+                target_territory_id
+            )
 
-        attack_info = {
-            "attack_remaining": attack_remaining,
-            "defender_remaining": defender_remaining,
-            "target": target_territory,
-            "attacker": self.game.attacking_territory,
-            "player": self.agent_player,
-            "attack_dice_nb": dice_nb,
-        }
-        self.game.after_attack(attack_info=attack_info)
+            attack_remaining, defender_remaining, dice_nb = self.game.perform_attack(
+                self.agent_player, self.game.attacking_territory, target_territory
+            )
+
+            attack_info = {
+                "attack_remaining": attack_remaining,
+                "defender_remaining": defender_remaining,
+                "target": target_territory,
+                "attacker": self.game.attacking_territory,
+                "player": self.agent_player,
+                "attack_dice_nb": dice_nb,
+            }
+            self.game.after_attack(attack_info=attack_info)
 
         # If player keep attacking, we choose an attacker again and we return the state
         if self.game.active_player.attack_wants_attack() and self.game.has_valid_attack(

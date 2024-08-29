@@ -125,7 +125,7 @@ class Player_Random(Player):
             return
 
     def attack_choose_attack_dices(self, attacker_troops):
-        return min(np.random.randint(1, 4), attacker_troops), np.random.choice(
+        return min(np.random.randint(1, 4), attacker_troops - 1), np.random.choice(
             [True, False]
         )
 
@@ -181,4 +181,4 @@ class Player_RL(Player):
 
     def attack_choose_attack_dices(self, attacker_troops):
         # RL player always blitz with maximum troops
-        return min(3, attacker_troops), True
+        return min(3, attacker_troops - 1), True

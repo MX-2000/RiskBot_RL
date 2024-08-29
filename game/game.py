@@ -206,7 +206,9 @@ class Game:
         )
         # time.sleep(PAUSE_BTW_ACTIONS)
         if not is_valid:
-            return
+            raise ValueError(
+                f"Invalid attack: {attack_dice_nb} dices with {attacker.troops} troops."
+            )
 
         defender_remaining = target.troops
 

@@ -187,6 +187,25 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         return observation, info
 
+    def get_masked_action_space(self):
+        """
+        Based on the state of the game, return the list of available actions
+
+        Currently, only choosing the attack territory.
+        Available actions is the list of territories that are adjacent to the attacking territory AND are not owned by the player
+        """
+        attacking_player = self.agent_player
+        attacker = self.game.attacking_territory
+
+        adjacent_territories = attacker.adjacent_territories_ids
+        valid_actions = [
+            t
+            for t in adjacent_territories
+            if self.game.game_map.get_territory_from_id(t).occupying_player_name
+            != attacking_player.name
+        ]
+        return valid_actions
+
     def step(self, action):
         """
         For now this is called right before choosing the target territory (action is target territory)
@@ -195,6 +214,15 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             - Running other non agent turns
             - Running the beginning of the agent turn (choosing attacker)
         """
+
+        masked_action_space = self.get_masked_action_space()
+
+        logger.debug(f"Action: {action}")
+        logger.debug(f"Valid actions: {masked_action_space}")
+
+        if action in masked_action_space:
+            raise ValueError(f"Invalid action {action} selected.")
+
         done = False
         reward = 0
 

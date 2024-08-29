@@ -40,7 +40,7 @@
         "territory_3": {
             "name": "territory_3",
             "adjacent_territories_ids": [
-                "territory_3",
+                "territory_2",
                 "territory_4",
                 "territory_1"
             ]

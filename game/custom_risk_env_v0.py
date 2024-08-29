@@ -331,7 +331,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         else:
             raise f"Incorrect phase: {self.game.game_phase}"
 
-        return self._get_obs(), reward, terminated, False, self._get_info()
+        return self._get_obs(), reward, False, False, self._get_info()
 
     def render(self):
         if self.render_mode == "human":

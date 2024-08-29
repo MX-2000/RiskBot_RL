@@ -120,9 +120,9 @@ class Player_Random(Player):
                 ]
             )
             return target
-        except IndexError:
+        except ValueError:
             # all adjacent territories are player's
-            return
+            return []
 
     def attack_choose_attack_dices(self, attacker_troops):
         return min(np.random.randint(1, 4), attacker_troops - 1), np.random.choice(

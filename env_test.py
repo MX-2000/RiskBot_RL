@@ -23,4 +23,5 @@ while not terminated:
 
     observation, reward, terminated, truncated, info = env.step(action)
 
+print(reward)
 env.close()

@@ -1,4 +1,4 @@
-import random
+import numpy as np
 
 from game.player import Player
 from game.territory import Territory
@@ -60,9 +60,9 @@ def roll_dices(
         defender_dices = []
 
         for i in range(attack_dice_nb):
-            attack_dices.append(random.randint(1, 6))
+            attack_dices.append(np.random.randint(1, 6))
         for i in range(min(target.troops, 2)):
-            defender_dices.append(random.randint(1, 6))
+            defender_dices.append(np.random.randint(1, 6))
 
         attack_dices = sorted(attack_dices, reverse=True)
         defender_dices = sorted(defender_dices, reverse=True)

@@ -1,7 +1,7 @@
 import time
 import os
 import json
-import random
+import numpy as np
 
 from loguru import logger
 
@@ -507,7 +507,7 @@ class Game:
             - randomly assigns the remaining troops to each territory
         """
         logger.debug(f"Called")
-        random.shuffle(self.players)
+        np.random.shuffle(self.players)
 
         self.active_player = self.players[0]
         self.active_player_idx = 0
@@ -519,7 +519,7 @@ class Game:
         i = 0
         while len(unassigned_territories) > 1:
             unassigned_territories = self.game_map.get_unassigned_territories()
-            t = random.choice(unassigned_territories)
+            t = np.random.choice(unassigned_territories)
             self.players[i].assign_territory(t)
 
             # Assign 1 troop
@@ -536,7 +536,7 @@ class Game:
                 player.controlled_territories
             )  # We already put 1 troop on each
             while p_remaining_troops > 0:
-                t = random.choice(player.controlled_territories)
+                t = np.random.choice(player.controlled_territories)
                 t.add_troops(1)
                 p_remaining_troops -= 1
 

@@ -164,7 +164,7 @@ class Player_RL(Player):
         return np.random.randint(1, troops_to_deploy)
 
     def draft_choose_territory_to_deploy(self) -> Territory:
-        return random.choice(self.controlled_territories)
+        return np.random.choice(self.controlled_territories)
 
     def attack_choose_attack_territory(self):
         t_with_more_than_one_troop = [
@@ -194,7 +194,7 @@ class Player_RL(Player):
         adjacent_territories = attack_territory.adjacent_territories_names
         # Target randomly an adjacent territory that isn't our own
         try:
-            target = random.choice(
+            target = np.random.choice(
                 [
                     t
                     for t in adjacent_territories

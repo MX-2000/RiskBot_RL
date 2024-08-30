@@ -1,5 +1,3 @@
-import random
-
 import pytest
 
 from game.dice_rolls import *
@@ -61,7 +59,7 @@ def test_rolling_dices():
     target.set_troops(2)
     attack_dice = 2
 
-    random.seed(1)
+    np.random.seed(1)
     # Expected sequence for random.randint(1,6):
     # [2,5,1,3,1,4,4,4,6,4,2,1,4,1,4]
 
@@ -85,12 +83,12 @@ def test_rolling_dices():
     assert attack_loss == 1
     assert def_loss == 0
 
-    random.seed(2)
+    np.random.seed(2)
     # Expected sequence:
     # [1,1,1,3,2,6,6,3,3,5,2]
     for i in range(7):
         # Consuming some to get where we want
-        random.randint(1, 6)
+        np.random.randint(1, 6)
 
     # Attack 3,3
     # Def 5,2

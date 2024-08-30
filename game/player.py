@@ -103,6 +103,10 @@ class Player_Random(Player):
         ]
         if len(t_with_more_than_one_troop) == 0:
             return
+
+        # Filter only those with enemy adjacent territories
+        # TODO
+
         return np.random.choice(t_with_more_than_one_troop)
 
     def attack_choose_target_territory(self, attack_territory: Territory) -> str:
@@ -175,9 +179,9 @@ class Player_RL(Player):
                 ]
             )
             return target
-        except IndexError:
+        except ValueError:
             # all adjacent territories are player's
-            return
+            return []
 
     def attack_choose_attack_dices(self, attacker_troops):
         # RL player always blitz with maximum troops

@@ -121,25 +121,10 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         logger.debug(f"Player turn: {self.game.active_player.name}")
 
-        # Simulate other player's turns
-        while self.game.active_player != self.agent_player:
-            self.game.draft_phase(self.game.active_player)
-            self.game.attack_phase(self.game.active_player)
-            # self.game.fortify_phase(self.game.active_player)
-            # self.game.card_phase(self.game.active_player)
-
-            # Check if the game ended during another player's turn
-            if self.game.is_game_over():
-                if self.game.remaining_players[0] == self.agent_player:
-                    reward = WIN_GAME_REWARD
-                else:
-                    reward = LOSE_GAME_REWARD
-
-                terminated = True
-                obs = self._get_obs()
-                return obs, self._get_info()
-
-            self.game.next_turn()
+        terminated = self.play_other_player_turn()
+        if terminated:
+            obs = self._get_obs()
+            return obs, self._get_info()
 
         logger.debug("RL Player turn")
         # It's back to the agent_player's turn again
@@ -209,6 +194,54 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         ]
         return valid_actions
 
+    def play_other_player_turn(self):
+
+        while self.game.active_player != self.agent_player:
+            self.game.draft_phase(self.game.active_player)
+            self.game.attack_phase(self.game.active_player)
+
+            # Check if the game ended during another player's turn
+            if self.game.is_game_over():
+                terminated = True
+                return terminated
+
+            self.game.next_turn()
+
+    def play_from_agent_player_draft(self):
+
+        if self.game.game_phase == "DRAFT":
+            troops_to_deploy = self.game.get_deployment_troops(self.game.active_player)
+
+            while (
+                troops_to_deploy > 0
+            ):  # To be replaced whenever the player will actually choose
+                # Doing random for now. Need to plug in player methods.
+                deploying = self.game.active_player.draft_choose_troops_to_deploy(
+                    troops_to_deploy
+                )
+                territory = self.game.active_player.draft_choose_territory_to_deploy()
+                territory.add_troops(deploying)
+                troops_to_deploy -= deploying
+
+            # We are now in ATTACK phase
+            self.game.next_phase()
+            # If the player can't attack or doesn't want to
+            while (
+                not self.game.active_player.attack_wants_attack()
+                or not self.game.has_valid_attack(self.game.active_player)
+            ):
+                terminated = self.play_other_player_turn()
+                if terminated:
+                    return terminated
+                self.play_from_agent_player_draft()
+
+            # We choose the attacking territory
+            attacker = self.game.active_player.attack_choose_attack_territory()
+            self.game.attacking_territory = attacker
+
+        else:
+            raise f"Incorrect phase: {self.game.game_phase}"
+
     def step(self, action):
         """
         For now this is called right before choosing the target territory (action is target territory)
@@ -218,41 +251,37 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             - Running the beginning of the agent turn (choosing attacker)
         """
 
-        if self.game.has_valid_attack(self.game.active_player):
+        masked_action_space = self.get_masked_action_space()
 
-            masked_action_space = self.get_masked_action_space()
+        logger.debug(
+            f"{[f'{t.name}, {t.id_}' for t in self.game.game_map.territories]}"
+        )
+        logger.debug(f"Action: {action}")
+        logger.debug(f"Valid actions: {masked_action_space}")
 
-            logger.debug(
-                f"{[f'{t.name}, {t.id_}' for t in self.game.game_map.territories]}"
-            )
-            logger.debug(f"Action: {action}")
-            logger.debug(f"Valid actions: {masked_action_space}")
+        if action not in masked_action_space:
+            raise ValueError(f"Invalid action {action} selected.")
 
-            if action not in masked_action_space:
-                raise ValueError(f"Invalid action {action} selected.")
+        done = False
+        reward = 0
 
-            done = False
-            reward = 0
+        # The agent turn. This will always be called after choosing attacker
+        target_territory_id = action
+        target_territory = self.game.game_map.get_territory_from_id(target_territory_id)
 
-            # The agent turn. This will always be called after choosing attacker
-            target_territory_id = action
-            target_territory = self.game.game_map.get_territory_from_id(
-                target_territory_id
-            )
+        attack_remaining, defender_remaining, dice_nb = self.game.perform_attack(
+            self.agent_player, self.game.attacking_territory, target_territory
+        )
 
-            attack_remaining, defender_remaining, dice_nb = self.game.perform_attack(
-                self.agent_player, self.game.attacking_territory, target_territory
-            )
-
-            attack_info = {
-                "attack_remaining": attack_remaining,
-                "defender_remaining": defender_remaining,
-                "target": target_territory,
-                "attacker": self.game.attacking_territory,
-                "player": self.agent_player,
-                "attack_dice_nb": dice_nb,
-            }
-            self.game.after_attack(attack_info=attack_info)
+        attack_info = {
+            "attack_remaining": attack_remaining,
+            "defender_remaining": defender_remaining,
+            "target": target_territory,
+            "attacker": self.game.attacking_territory,
+            "player": self.agent_player,
+            "attack_dice_nb": dice_nb,
+        }
+        self.game.after_attack(attack_info=attack_info)
 
         # If player keep attacking, we choose an attacker again and we return the state
         if self.game.active_player.attack_wants_attack() and self.game.has_valid_attack(
@@ -273,64 +302,30 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             obs = self._get_obs()
             return obs, reward, terminated, False, self._get_info()
 
-        self.game.next_phase()  # Useless for now
+        self.game.next_phase()
         # TODO What do in reinforce phase?
 
         self.game.next_turn()
 
-        # Simulate other player's turns
-        while self.game.active_player != self.agent_player:
-            self.game.draft_phase(self.game.active_player)
-            self.game.attack_phase(self.game.active_player)
-            # self.game.fortify_phase(self.game.active_player)
-            # self.game.card_phase(self.game.active_player)
+        terminated = self.play_other_player_turn()
+        if terminated:
+            if self.game.remaining_players[0] == self.agent_player:
+                reward = WIN_GAME_REWARD
+            else:
+                reward = LOSE_GAME_REWARD
+            obs = self._get_obs()
+            return obs, reward, terminated, False, self._get_info()
 
-            # Check if the game ended during another player's turn
-            if self.game.is_game_over():
-                if self.game.remaining_players[0] == self.agent_player:
-                    reward = WIN_GAME_REWARD
-                else:
-                    reward = LOSE_GAME_REWARD
+        terminated = self.play_from_agent_player_draft()
+        if terminated:
+            if self.game.remaining_players[0] == self.agent_player:
+                reward = WIN_GAME_REWARD
+            else:
+                reward = LOSE_GAME_REWARD
+            obs = self._get_obs()
+            return obs, reward, terminated, False, self._get_info()
 
-                terminated = True
-                obs = self._get_obs()
-                return obs, reward, terminated, False, self._get_info()
-
-            self.game.next_turn()
-
-        # It's back to the agent_player's turn again
-        if self.game.game_phase == "DRAFT":
-            troops_to_deploy = self.game.get_deployment_troops(self.game.active_player)
-
-            while (
-                troops_to_deploy > 0
-            ):  # To be replaced whenever the player will actually choose
-                # Doing random for now. Need to plug in player methods.
-                deploying = self.game.active_player.draft_choose_troops_to_deploy(
-                    troops_to_deploy
-                )
-                territory = self.game.active_player.draft_choose_territory_to_deploy()
-                territory.add_troops(deploying)
-                troops_to_deploy -= deploying
-
-            # We are now in ATTACK phase
-            self.game.next_phase()
-            # If the player can't attack or doesn't want to
-            if (
-                not self.game.active_player.attack_wants_attack()
-                or not self.game.has_valid_attack(self.game.active_player)
-            ):
-                # We should run the entire game loop again up to agent_player's turn
-                # This should never happen though, because the player will always deploy troops and for now we make it always want to attack
-                raise f"Error in current design"
-
-            # We choose the attacking territory
-            attacker = self.game.active_player.attack_choose_attack_territory()
-            self.game.attacking_territory = attacker
-
-        else:
-            raise f"Incorrect phase: {self.game.game_phase}"
-
+        # It should be now back up to the agent making a new choice
         return self._get_obs(), reward, False, False, self._get_info()
 
     def render(self):

@@ -170,9 +170,22 @@ class Player_RL(Player):
         t_with_more_than_one_troop = [
             t for t in self.controlled_territories if t.troops > 1
         ]
-        if len(t_with_more_than_one_troop) == 0:
+
+        # Getting player controlled territories names
+        player_t = [t.name for t in self.controlled_territories]
+        # Filtering on territories having at least one adjacent territory that isn't owned by us
+        t_with_valid_attack = list(
+            filter(
+                lambda x: any(
+                    [t_n not in player_t for t_n in x.adjacent_territories_names]
+                ),
+                t_with_more_than_one_troop,
+            )
+        )
+        if len(t_with_valid_attack) == 0:
             return
-        return np.random.choice(t_with_more_than_one_troop)
+
+        return np.random.choice(t_with_valid_attack)
 
     def attack_choose_target_territory(self, attack_territory: Territory) -> str:
         """

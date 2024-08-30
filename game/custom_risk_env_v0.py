@@ -212,10 +212,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         if self.game.game_phase == "DRAFT":
             troops_to_deploy = self.game.get_deployment_troops(self.game.active_player)
 
-            while (
-                troops_to_deploy > 0
-            ):  # To be replaced whenever the player will actually choose
-                # Doing random for now. Need to plug in player methods.
+            while troops_to_deploy > 0:
                 deploying = self.game.active_player.draft_choose_troops_to_deploy(
                     troops_to_deploy
                 )

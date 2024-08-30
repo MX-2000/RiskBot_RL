@@ -49,7 +49,7 @@ class Game:
         self.game_phase = None
         self.active_player = None
         self.attacking_territory = None
-        self.load_map(self.map_name)
+        self.game_map = self.load_map(self.map_name)
         for p in self.players:
             p.reset()
         self.init_players()

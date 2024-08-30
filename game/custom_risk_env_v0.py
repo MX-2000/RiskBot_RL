@@ -62,7 +62,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
 
-        logger.debug(self.game)
+        # logger.debug(self.game)
 
     def _get_obs(self):
         """

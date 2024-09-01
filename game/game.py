@@ -35,19 +35,16 @@ class Game:
         self.game_phase = None
         self.active_player = None
         self.active_player_idx = None
-        self.np_random = np.random
 
         # Usefull to construct observation space
         self.attacking_territory = None
 
         self.game_map = self.load_map(map_name)
 
-    def reset(self, randomizer=None):
+    def reset(self):
         """
         Called by the environment
         """
-        if randomizer:
-            self.np_random = randomizer
         self.turn_number = 1
         self.game_phase = None
         self.active_player = None
@@ -55,7 +52,7 @@ class Game:
         self.game_map = self.load_map(self.map_name)
         for p in self.players:
             p.reset()
-        self.init_players(randomizer)
+        self.init_players()
         self.remaining_players = self.players
         self.game_phase = "DRAFT"
 
@@ -500,7 +497,7 @@ class Game:
     def get_remaining_players(self):
         return [player for player in self.players if not player.is_dead]
 
-    def init_players(self, randomizer=None):
+    def init_players(self):
         """
         Based on the map & the player number:
             - shuffle the order
@@ -510,12 +507,6 @@ class Game:
             - randomly assigns the remaining troops to each territory
         """
         logger.debug(f"Called")
-        if not randomizer:
-            randomizer = self.np_random
-
-        for p in self.players:
-            p.set_randomizer(randomizer)
-
         np.random.shuffle(self.players)
 
         self.active_player = self.players[0]

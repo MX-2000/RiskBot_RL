@@ -14,10 +14,6 @@ class Player:
         self.controlled_territories: list[Territory] = []
         self.cards = None
         self.is_dead = False
-        self.np_random = np.random
-
-    def set_randomizer(self, randomizer):
-        self.np_random = randomizer
 
     def reset(self):
         self.controlled_territories = []

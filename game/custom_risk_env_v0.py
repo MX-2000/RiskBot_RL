@@ -18,7 +18,7 @@ WIN_GAME_REWARD = 1e10
 
 
 class RiskEnv_Choice_is_attack_territory(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 0}
+    metadata = {"render_modes": ["human"], "render_fps": 1}
 
     def __init__(self, game: Game, agent_player: Player, render_mode=None) -> None:
         self.game = game
@@ -114,10 +114,13 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         return {}
 
     def reset(self, seed=None, options=None):
+        logger.debug("*********************RESET********************")
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
 
-        self.game.reset(seed=seed)
+        np.random.seed(seed=seed)
+
+        self.game.reset()
 
         logger.debug(f"Player turn: {self.game.active_player.name}")
 

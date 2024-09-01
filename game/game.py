@@ -41,13 +41,10 @@ class Game:
 
         self.game_map = self.load_map(map_name)
 
-    def reset(self, seed=None):
+    def reset(self):
         """
         Called by the environment
         """
-        if seed:
-            np.random.seed(seed)
-
         self.turn_number = 1
         self.game_phase = None
         self.active_player = None
@@ -62,6 +59,13 @@ class Game:
     def _set_players_id(self):
         for i, p in enumerate(self.players):
             p.id_ = i
+
+    def get_player_by_id(self, id):
+        for p in self.players:
+            if p.id_ == id:
+                return p
+
+        raise ValueError(f"No such player with id: {id}")
 
     def next_turn(self):
 
@@ -510,7 +514,13 @@ class Game:
             - randomly assigns the remaining troops to each territory
         """
         logger.debug(f"Called")
+
+        # Need to reset the original list order for seeding & deterministic behaviour
+        player_list = [self.get_player_by_id(i) for i in range(len(self.players))]
+        self.players = player_list
         np.random.shuffle(self.players)
+
+        logger.debug(f"Player order: {[p.name for p in self.players]}")
 
         self.active_player = self.players[0]
         self.active_player_idx = 0

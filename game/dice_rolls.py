@@ -38,6 +38,7 @@ def roll_dices(
     target: Territory,
     attack_dice_nb: int,
     true_random=True,
+    np_random=np.random,
 ):
     """
     Returns tuple: [attacker_loss, defender_loss]
@@ -60,9 +61,9 @@ def roll_dices(
         defender_dices = []
 
         for i in range(attack_dice_nb):
-            attack_dices.append(np.random.randint(1, 6))
+            attack_dices.append(np_random.randint(1, 6))
         for i in range(min(target.troops, 2)):
-            defender_dices.append(np.random.randint(1, 6))
+            defender_dices.append(np_random.randint(1, 6))
 
         attack_dices = sorted(attack_dices, reverse=True)
         defender_dices = sorted(defender_dices, reverse=True)

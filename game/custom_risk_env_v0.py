@@ -117,7 +117,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
 
-        self.game.reset()
+        self.game.reset(seed=seed)
 
         logger.debug(f"Player turn: {self.game.active_player.name}")
 

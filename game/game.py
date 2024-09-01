@@ -41,10 +41,13 @@ class Game:
 
         self.game_map = self.load_map(map_name)
 
-    def reset(self):
+    def reset(self, seed=None):
         """
         Called by the environment
         """
+        if seed:
+            np.random.seed(seed)
+
         self.turn_number = 1
         self.game_phase = None
         self.active_player = None

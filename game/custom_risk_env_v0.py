@@ -33,18 +33,12 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         self.observation_space = spaces.Dict(
             {
-                "territory_ids": spaces.MultiDiscrete(
-                    [num_territories for _ in range(num_territories)]
-                ),  # Vector (n,) for territory id
                 "num_troops": spaces.MultiDiscrete(
                     [max_troops for _ in range(num_territories)]
                 ),  # Vector (n,) for number of troops
                 "player_ids_territory": spaces.MultiDiscrete(
                     [num_players for _ in range(num_territories)]
                 ),  # Vector (n,) for the assigned player id
-                "continent_ids": spaces.MultiDiscrete(
-                    [num_continents for _ in range(num_continents)]
-                ),  # Vector (j,) for j continents
                 "continent_territories": spaces.MultiBinary(
                     num_continents * num_territories
                 ),  # Vector(c,t) for territories inside each continent, c continents x t territories
@@ -68,12 +62,17 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
     def flatten_obs(self, obs):
         # Flatten each part of the observation manually
-        flat_terr_id = obs["territory_ids"].flatten()
         flat_player_id_terr = obs["player_ids_territory"].flatten()
-        flat_continent_ids = obs["continent_ids"].flatten()
         flat_cont_terr = obs["continent_territories"].flatten()
-        flat_player = obs["player"].flatten()
-        flat_att_terr = obs["attacking_territory"].flatten()
+
+        player_one_hot = np.zeros(len(self.game.players), dtype=np.int16)
+        player_one_hot[obs["player"]] = 1
+        flat_player = player_one_hot
+
+        att_t_one_hot = np.zeros(len(self.game.game_map.territories), dtype=np.int16)
+        att_t_one_hot[obs["attacking_territory"]] = 1
+        flat_att_terr = att_t_one_hot
+
         flat_conn = obs["connexions"].flatten()
 
         # That one we keep label encoded
@@ -81,9 +80,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         flattened_obs = np.concatenate(
             [
-                flat_terr_id,
                 flat_player_id_terr,
-                flat_continent_ids,
                 flat_cont_terr,
                 flat_player,
                 flat_att_terr,
@@ -98,12 +95,10 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         Compute the observation state
         """
 
-        territory_ids = []
         num_troops = []
         player_ids_territory = []
         connexions = []
         for t in self.game.game_map.territories:
-            territory_ids.append(t.id_)
             num_troops.append(t.troops)
             player_ids_territory.append(
                 self.game.get_player_by_name(t.occupying_player_name).id_
@@ -114,10 +109,8 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 t_connexions[t_id] = 1
             connexions.extend(t_connexions)
 
-        continent_ids = []
         continent_territories = []  # Binaries of length num_territories
         for c in self.game.game_map.continents:
-            continent_ids.append(c.id_)
             c_territories = [0] * len(self.game.game_map.territories)
             c_terr_ids = [t.id_ for t in c.territories]
             for idx in c_terr_ids:
@@ -129,10 +122,8 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         attacking_territory = self.game.attacking_territory.id_
 
         return {
-            "territory_ids": np.array(territory_ids),
             "num_troops": np.array(num_troops),
             "player_ids_territory": np.array(player_ids_territory),
-            "continent_ids": np.array(continent_ids),
             "continent_territories": np.array(continent_territories),
             "player": player,
             "attacking_territory": attacking_territory,

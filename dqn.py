@@ -12,7 +12,7 @@ from game.player import Player_Random, Player_RL
 
 import gymnasium as gym
 
-# TODO import loguru & replace
+from loguru import logger
 
 
 # Memory for experience replay
@@ -69,21 +69,22 @@ class DQN:
 
     def select_action(self, state, episode_nb):
         valid_actions = self.env.unwrapped.get_masked_action_space()
+        logger.debug(f"Valid actions: {valid_actions}")
         if episode_nb < 200:
             action = np.random.choice(valid_actions)
         elif np.random.random() < self.epsilon:
             action = np.random.choice(valid_actions)
         else:
             q_values = self.target_dqn.predict(state.reshape(1, 6), verbose=0)
-            # print(q_values)
+            logger.debug(f"Q_values: {q_values}")
             mask = np.zeros(self.num_actions, dtype=int)
             mask[valid_actions] = 1
+            logger.debug(f"Mask: {mask}")
 
             valid_q_values = mask * q_values
+            logger.debug(f"Valid_q_values: {valid_q_values}")
             action = np.argmax(valid_q_values[0])
-            # print(f"Taking greedy action: {action} in state: {state}")
 
-        # TODO make sure the action is valid
         return action
 
     def train_network(self):
@@ -101,7 +102,6 @@ class DQN:
 
             # Copy policy network to target network after a certain number of steps
             if self.updateCounter > self.target_update_freq:
-                print("Copying weights")
                 self.target_dqn.set_weights(self.policy_dqn.get_weights())
                 self.updateCounter = 0
 
@@ -112,11 +112,11 @@ class DQN:
 
         steps_per_episode = []
 
-        print(f"Initialization done, with {episodes} episodes")
+        logger.debug(f"Initialization done, with {episodes} episodes")
 
         for i in range(episodes):
 
-            print(f"Simulating episode {i}, epsilon={self.epsilon}")
+            logger.debug(f"Simulating episode {i}, epsilon={self.epsilon}")
             state = self.env.reset()[0]
 
             terminated = False  # True when agent reach the target
@@ -136,13 +136,13 @@ class DQN:
 
                 steps_to_complete += 1
 
-            print(f"Steps to complete the episode: {steps_to_complete}")
+            logger.debug(f"Steps to complete the episode: {steps_to_complete}")
 
             steps_per_episode.append(steps_to_complete)
 
             self.train_network()
 
-        print(f"Episodes overn")
+        logger.debug(f"Episodes overn")
         # Close environment
         env.close()
 
@@ -234,4 +234,3 @@ if __name__ == "__main__":
     env = gym.make("game/RiskEnv-V0", game=game, agent_player=p2, render_mode="human")
     RL_bot = DQN(env)
     RL_bot.train(100)
-    # warehouse_bot.test(4)

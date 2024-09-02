@@ -11,6 +11,7 @@ from game.game import Game
 from game.player import Player_Random, Player_RL
 
 import gymnasium as gym
+from gymnasium.spaces.utils import flatten_space
 
 from loguru import logger
 
@@ -44,6 +45,8 @@ class DQN:
 
     def __init__(self, env: gym.Env) -> None:
         self.env = env
+
+        obs_sample = env.observation_space.sample()
 
         self.num_states = env.observation_space.shape[0]
         self.num_actions = env.action_space.n

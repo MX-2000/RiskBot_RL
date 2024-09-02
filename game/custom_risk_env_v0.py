@@ -4,6 +4,8 @@ import numpy as np
 
 import gymnasium as gym
 from gymnasium import spaces
+from gymnasium.spaces.utils import flatten_space
+
 from loguru import logger
 
 logger.add(
@@ -63,6 +65,33 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         self.render_mode = render_mode
 
         # logger.debug(self.game)
+
+    def flatten_obs(self, obs):
+        # Flatten each part of the observation manually
+        flat_terr_id = obs["territory_ids"].flatten()
+        flat_player_id_terr = obs["player_ids_territory"].flatten()
+        flat_continent_ids = obs["continent_ids"].flatten()
+        flat_cont_terr = obs["continent_territories"].flatten()
+        flat_player = obs["player"].flatten()
+        flat_att_terr = obs["attacking_territory"].flatten()
+        flat_conn = obs["connexions"].flatten()
+
+        # That one we keep label encoded
+        flat_num_troops = obs["num_troops"]
+
+        flattened_obs = np.concatenate(
+            [
+                flat_terr_id,
+                flat_player_id_terr,
+                flat_continent_ids,
+                flat_cont_terr,
+                flat_player,
+                flat_att_terr,
+                flat_conn,
+                flat_num_troops,
+            ]
+        )
+        return flattened_obs
 
     def _get_obs(self):
         """

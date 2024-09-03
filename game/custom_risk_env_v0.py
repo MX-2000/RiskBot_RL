@@ -276,6 +276,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 not self.game.active_player.attack_wants_attack()
                 or not self.game.has_valid_attack(self.game.active_player)
             ):
+                self.game.next_turn()
                 terminated = self.play_other_player_turn()
                 if terminated:
                     return terminated

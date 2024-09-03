@@ -25,7 +25,7 @@ class ReplayMemory:
         self.memory.append(transition)
 
     def sample(self, sample_size):
-        return np.random.choice(self.memory, sample_size, replace=False)
+        return random.sample(self.memory, sample_size)
 
     def __len__(self):
         return len(self.memory)

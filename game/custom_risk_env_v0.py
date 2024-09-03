@@ -60,6 +60,21 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         # logger.debug(self.game)
 
+    def flatten_observation_space(self):
+        flattened_space_shape = self._calculate_flattened_space_shape()
+        return gym.spaces.Box(
+            low=-np.inf, high=np.inf, shape=(flattened_space_shape,), dtype=np.float32
+        )
+
+    def _calculate_flattened_space_shape(self):
+        flattened_shape = 0
+        for key, space in self.observation_space.spaces.items():
+            if key == "num_troops":
+                flattened_shape += len(self.game.game_map.territories)
+            else:
+                flattened_shape += flatten_space(space).shape[0]
+        return flattened_shape
+
     def flatten_obs(self, obs):
         # Flatten each part of the observation manually
 

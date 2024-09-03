@@ -25,7 +25,7 @@ class ReplayMemory:
         self.memory.append(transition)
 
     def sample(self, sample_size):
-        return np.random.sample(self.memory, sample_size)
+        return np.random.choice(self.memory, sample_size, replace=False)
 
     def __len__(self):
         return len(self.memory)
@@ -46,9 +46,9 @@ class DQN:
     def __init__(self, env: gym.Env) -> None:
         self.env = env
 
-        obs_sample = env.observation_space.sample()
+        flattened_obs = env.unwrapped.flatten_observation_space()
 
-        self.num_states = env.observation_space.shape[0]
+        self.num_states = flattened_obs.shape[0]
         self.num_actions = env.action_space.n
 
         self.memory = ReplayMemory(self.replay_memory_size)

@@ -38,7 +38,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 ),  # Vector (n,) for number of troops
                 "player_ids_territory": spaces.MultiDiscrete(
                     [num_players for _ in range(num_territories)]
-                ),  # Vector (n,) for the assigned player id
+                ),  # Vector (n,) for the player controlling each territory
                 "continent_territories": spaces.MultiBinary(
                     num_continents * num_territories
                 ),  # Vector(c,t) for territories inside each continent, c continents x t territories
@@ -62,7 +62,18 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
     def flatten_obs(self, obs):
         # Flatten each part of the observation manually
-        flat_player_id_terr = obs["player_ids_territory"].flatten()
+
+        # This should be a (terr_nb,player_nb) shape one hot encoded to which player controls which territory
+        flat_player_id_terr = np.zeros(
+            shape=(len(self.game.players) * len(self.game.game_map.territories),),
+            dtype=np.int8,
+        )
+        for i in range(len(obs["player_ids_territory"])):
+            territory_idx_start = i * len(self.game.players)
+            flat_player_id_terr[
+                territory_idx_start + obs["player_ids_territory"][i]
+            ] = 1
+
         flat_cont_terr = obs["continent_territories"].flatten()
 
         player_one_hot = np.zeros(len(self.game.players), dtype=np.int16)

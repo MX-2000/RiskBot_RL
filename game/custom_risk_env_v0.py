@@ -255,6 +255,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 return terminated
 
             self.game.next_turn()
+        return False
 
     def play_from_agent_player_draft(self):
 
@@ -280,11 +281,12 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 terminated = self.play_other_player_turn()
                 if terminated:
                     return terminated
-                self.play_from_agent_player_draft()
+                return self.play_from_agent_player_draft()
 
             # We choose the attacking territory
             attacker = self.game.active_player.attack_choose_attack_territory()
             self.game.attacking_territory = attacker
+            return False
 
         else:
             raise f"Incorrect phase: {self.game.game_phase}"
@@ -329,6 +331,16 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             "attack_dice_nb": dice_nb,
         }
         self.game.after_attack(attack_info=attack_info)
+
+        if self.game.is_game_over():
+            if self.game.remaining_players[0] == self.agent_player:
+                reward = WIN_GAME_REWARD
+            else:
+                reward = LOSE_GAME_REWARD
+
+            terminated = True
+            obs = self._get_obs()
+            return obs, reward, terminated, False, self._get_info()
 
         # If player keep attacking, we choose an attacker again and we return the state
         if self.game.active_player.attack_wants_attack() and self.game.has_valid_attack(

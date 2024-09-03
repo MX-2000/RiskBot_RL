@@ -91,8 +91,8 @@ class DQN:
 
         return action
 
-    def train_network(self):
-        if len(self.memory) > self.mini_batch_size:
+    def train_network(self, episode_nb):
+        if len(self.memory) > self.mini_batch_size and episode_nb > 200:
 
             mini_batch = self.memory.sample(self.mini_batch_size)
             self.optimize(mini_batch)
@@ -122,6 +122,11 @@ class DQN:
 
             logger.debug(f"Simulating episode {i}, epsilon={self.epsilon}")
             state = self.env.reset()[0]
+
+            # Because on super small maps 1v1 sometimes random player can win turn 1
+            while self.env.unwrapped.game.is_game_over():
+                logger.debug(f"P1 won turn 1")
+                state = self.env.reset()[0]
             state = self.env.unwrapped.flatten_obs(state)
 
             terminated = False  # True when agent reach the target
@@ -146,7 +151,7 @@ class DQN:
 
             steps_per_episode.append(steps_to_complete)
 
-            self.train_network()
+            self.train_network(episode_nb=i)
 
         logger.debug(f"Episodes overn")
         # Close environment

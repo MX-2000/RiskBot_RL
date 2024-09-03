@@ -65,7 +65,8 @@ class DQN:
     def create_q_model(self, input_dim, output_dim):
         model = tf.keras.Sequential()
         model.add(tfl.Dense(input_shape=[input_dim], units=64, activation="relu"))
-        # model.add(tfl.Dense(64, activation="relu")),
+        model.add(tfl.Dense(64, activation="relu")),
+        model.add(tfl.Dense(64, activation="relu")),
         model.add(tfl.Dense(output_dim, activation="linear"))
         model.compile(optimizer=self.optimizer, loss=self.loss_function)
         return model

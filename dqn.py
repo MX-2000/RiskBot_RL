@@ -79,7 +79,7 @@ class DQN:
         elif np.random.random() < self.epsilon:
             action = np.random.choice(valid_actions)
         else:
-            q_values = self.target_dqn.predict(state.reshape(1, 6), verbose=0)
+            q_values = self.target_dqn.predict(state, verbose=0)
             logger.debug(f"Q_values: {q_values}")
             mask = np.zeros(self.num_actions, dtype=int)
             mask[valid_actions] = 1
@@ -109,7 +109,7 @@ class DQN:
                 self.target_dqn.set_weights(self.policy_dqn.get_weights())
                 self.updateCounter = 0
 
-    def train(self, episodes=100):
+    def train(self, episodes=500):
         # List to keep track of epsilon decay
         self.epsilon_history = []
         self.updateCounter = 0
@@ -122,6 +122,7 @@ class DQN:
 
             logger.debug(f"Simulating episode {i}, epsilon={self.epsilon}")
             state = self.env.reset()[0]
+            state = self.env.unwrapped.flatten_obs(state)
 
             terminated = False  # True when agent reach the target
             truncated = False  # True when agent takes too long
@@ -133,6 +134,7 @@ class DQN:
                 action = self.select_action(state, i)
 
                 new_state, reward, terminated, truncated, _ = env.step(action)
+                new_state = self.env.unwrapped.flatten_obs(new_state)
 
                 self.memory.append((state, action, new_state, reward, terminated))
 
@@ -237,4 +239,4 @@ if __name__ == "__main__":
 
     env = gym.make("game/RiskEnv-V0", game=game, agent_player=p2, render_mode="human")
     RL_bot = DQN(env)
-    RL_bot.train(100)
+    RL_bot.train(1000)

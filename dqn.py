@@ -79,7 +79,7 @@ class DQN:
         elif np.random.random() < self.epsilon:
             action = np.random.choice(valid_actions)
         else:
-            q_values = self.target_dqn.predict(state, verbose=0)
+            q_values = self.target_dqn.predict(state.reshape(1, -1), verbose=0)
             logger.debug(f"Q_values: {q_values}")
             mask = np.zeros(self.num_actions, dtype=int)
             mask[valid_actions] = 1

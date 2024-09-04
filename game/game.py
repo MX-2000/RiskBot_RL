@@ -469,7 +469,7 @@ class Game:
         Start game loop for normal games
         """
         self.init_players()
-        self.render()
+        # self.render()
 
         remaining_players = self.players
 
@@ -482,11 +482,11 @@ class Game:
 
                 wait_for_cmd_action()
                 self.draft_phase(player)
-                self.render()
+                # self.render()
                 wait_for_cmd_action()
                 self.attack_phase(player)
 
-                self.render()
+                # self.render()
                 # self.fortify_phase(player)
                 # time.sleep(PAUSE_BTW_ACTIONS)
                 # self.card_phase(player)

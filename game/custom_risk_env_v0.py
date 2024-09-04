@@ -11,6 +11,7 @@ from loguru import logger
 logger.add(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), f"env.log"), mode="w"
 )
+logger.remove()
 
 from game.game import Game
 from game.player import Player, Player_Random

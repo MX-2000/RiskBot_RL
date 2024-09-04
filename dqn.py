@@ -127,10 +127,13 @@ class DQN:
         self.updateCounter = 0
 
         steps_per_episode = []
+        rewards_per_episode = []
 
         logger.debug(f"Initialization done, with {episodes} episodes")
 
         for i in range(episodes):
+
+            episode_reward = 0
 
             logger.info(f"Simulating episode {i}, epsilon={self.epsilon}")
             state = self.env.reset()[0]
@@ -158,10 +161,12 @@ class DQN:
                 state = new_state
 
                 steps_to_complete += 1
+                episode_reward += reward
 
             logger.debug(f"Steps to complete the episode: {steps_to_complete}")
 
             steps_per_episode.append(steps_to_complete)
+            rewards_per_episode.append(episode_reward)
 
             self.train_network(episode_nb=i)
 
@@ -176,7 +181,7 @@ class DQN:
         plt.figure(1)
 
         plt.subplot(121)  # plot on a 1 row x 2 col grid, at cell 1
-        plt.plot(steps_per_episode)
+        plt.plot(rewards_per_episode)
 
         # Plot epsilon decay (Y-axis) vs episodes (X-axis)
         plt.subplot(122)  # plot on a 1 row x 2 col grid, at cell 2

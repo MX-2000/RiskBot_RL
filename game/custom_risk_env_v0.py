@@ -1,4 +1,5 @@
 import os
+import sys
 
 import numpy as np
 
@@ -11,8 +12,11 @@ from loguru import logger
 logger.remove()
 
 logger.add(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), f"env.log"), mode="w"
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), f"env.log"),
+    level="DEBUG",
+    mode="w",
 )
+logger.add(sys.stdout, level="INFO")
 
 from game.game import Game
 from game.player import Player, Player_Random

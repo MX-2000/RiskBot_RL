@@ -120,7 +120,7 @@ class DQN:
 
         for i in range(episodes):
 
-            logger.debug(f"Simulating episode {i}, epsilon={self.epsilon}")
+            logger.info(f"Simulating episode {i}, epsilon={self.epsilon}")
             state = self.env.reset()[0]
 
             # Because on super small maps 1v1 sometimes random player can win turn 1

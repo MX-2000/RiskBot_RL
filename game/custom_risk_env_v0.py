@@ -8,10 +8,11 @@ from gymnasium.spaces.utils import flatten_space
 
 from loguru import logger
 
+logger.remove()
+
 logger.add(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), f"env.log"), mode="w"
 )
-logger.remove()
 
 from game.game import Game
 from game.player import Player, Player_Random

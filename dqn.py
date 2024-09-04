@@ -85,7 +85,7 @@ class DQN:
             mask[valid_actions] = 1
             logger.debug(f"Mask: {mask}")
 
-            valid_q_values = mask * q_values
+            valid_q_values = np.where(mask == 1, q_values, -np.inf)
             logger.debug(f"Valid_q_values: {valid_q_values}")
             action = np.argmax(valid_q_values[0])
 
@@ -242,6 +242,6 @@ if __name__ == "__main__":
     p2 = Player_RL("p2")
     game = Game("test_map_v0", [p1, p2])
 
-    env = gym.make("game/RiskEnv-V0", game=game, agent_player=p2, render_mode="human")
+    env = gym.make("game/RiskEnv-V0", game=game, agent_player=p2, render_mode=None)
     RL_bot = DQN(env)
     RL_bot.train(1000)

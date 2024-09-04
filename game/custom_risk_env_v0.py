@@ -56,6 +56,9 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 "connexions": spaces.MultiBinary(
                     num_territories * num_territories
                 ),  # Flattened adjacency matrix
+                "troops_to_deploy": spaces.Box(
+                    low=0, high=np.inf, shape=(1,), dtype=np.int128
+                ),
             }
         )
 

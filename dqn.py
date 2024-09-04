@@ -1,5 +1,7 @@
 from collections import deque
 import random
+import time
+
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -89,20 +91,22 @@ class DQN:
             valid_q_values = np.where(mask == 1, q_values, -np.inf)
             logger.debug(f"Valid_q_values: {valid_q_values}")
             action = np.argmax(valid_q_values[0])
+            logger.debug(f"Selected action: {action}")
 
         return action
 
     def decay_epsilon(self, episode_nb):
         return self.epsilon_end + (self.epsilon_start - self.epsilon_end) * (
             1
-            - np.log(1 + self.epsilon_decay * episode_nb)
-            / np.log(1 + self.epsilon_decay * self.tot_episodes)
+            - np.log(1 + self.epsilon_decay * (episode_nb - self.start_decay))
+            / np.log(1 + self.epsilon_decay * (self.tot_episodes - self.start_decay))
         )
 
     def train_network(self, episode_nb):
         if len(self.memory) > self.mini_batch_size and episode_nb > self.start_decay:
 
             mini_batch = self.memory.sample(self.mini_batch_size)
+
             self.optimize(mini_batch)
 
             # Decay epsilon
@@ -129,8 +133,6 @@ class DQN:
         steps_per_episode = []
         rewards_per_episode = []
 
-        logger.debug(f"Initialization done, with {episodes} episodes")
-
         for i in range(episodes):
 
             episode_reward = 0
@@ -140,7 +142,6 @@ class DQN:
 
             # Because on super small maps 1v1 sometimes random player can win turn 1
             while self.env.unwrapped.game.is_game_over():
-                logger.debug(f"P1 won turn 1")
                 state = self.env.reset()[0]
             state = self.env.unwrapped.flatten_obs(state)
 
@@ -152,6 +153,7 @@ class DQN:
             while not terminated and not truncated:
 
                 action = self.select_action(state, i)
+                # Inference might take up to 0.05s
 
                 new_state, reward, terminated, truncated, _ = env.step(action)
                 new_state = self.env.unwrapped.flatten_obs(new_state)
@@ -163,14 +165,13 @@ class DQN:
                 steps_to_complete += 1
                 episode_reward += reward
 
-            logger.debug(f"Steps to complete the episode: {steps_to_complete}")
-
             steps_per_episode.append(steps_to_complete)
             rewards_per_episode.append(episode_reward)
 
             self.train_network(episode_nb=i)
+            # Optimizing might take up to 0.08s
 
-        logger.debug(f"Episodes overn")
+        logger.debug(f"Simulation over")
         # Close environment
         env.close()
 

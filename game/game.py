@@ -31,7 +31,7 @@ class Game:
         self.deck = None
         self.fixed = fixed
         self.true_random = true_random
-        self.turn_number = 1
+        self.turn_number = 0
         self.game_phase = None
         self.active_player = None
         self.active_player_idx = None
@@ -45,7 +45,7 @@ class Game:
         """
         Called by the environment
         """
-        self.turn_number = 1
+        self.turn_number = 0
         self.game_phase = None
         self.active_player = None
         self.attacking_territory = None
@@ -68,6 +68,7 @@ class Game:
         raise ValueError(f"No such player with id: {id}")
 
     def next_turn(self):
+        logger.debug(self)
 
         self.active_player_idx += 1
         if self.active_player_idx >= len(self.players):
@@ -75,7 +76,9 @@ class Game:
 
         self.active_player = self.players[self.active_player_idx]
         self.game_phase = "DRAFT"
-        self.turn_number += 1
+        if self.active_player == self.players[0]:
+            self.turn_number += 1
+            logger.debug(f"Turn {self.turn_number}")
         logger.debug(f"Player turn: {self.active_player.name}")
 
     def next_phase(self):
@@ -231,10 +234,8 @@ class Game:
                 )
                 attack_remaining = attacker.remove_troops(attacker_loss)
                 defender_remaining = target.remove_troops(defender_loss)
-                logger.debug(
-                    f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
-                )
-                # time.sleep(PAUSE_BTW_ACTIONS)
+            logger.debug(f"Remaining: A: {attack_remaining}, D: {defender_remaining}")
+            # time.sleep(PAUSE_BTW_ACTIONS)
 
         else:
             attacker_loss, defender_loss = attack_once(
@@ -264,7 +265,7 @@ class Game:
             attack_info["attack_dice_nb"],
         )
         if defender_remaining == 0:
-            logger.debug(f"Territory got conquered, transferring troops and ownership")
+            logger.debug(f"{player.name} conquered {target.name}")
             # Update ownership
             target_player = self.get_player_by_name(target.occupying_player_name)
             target_player.remove_territory(target)
@@ -295,7 +296,6 @@ class Game:
         For bot so far: choose randomly 1 territory to attack another
         The sanity checks are out of the random choice, for later implementation
         """
-        logger.debug(f"Called on {player.name}")
         self.game_phase = "ATTACK"
 
         if not self.has_valid_attack(player):
@@ -307,7 +307,7 @@ class Game:
             if not self.has_valid_attack(player):
                 break
             if not player.attack_wants_attack():
-                logger.debug(f"Player does not want to attack")
+                logger.debug(f"{player.name} does not want to attack")
                 break
 
             attacker = player.attack_choose_attack_territory()
@@ -348,10 +348,10 @@ class Game:
                     )
                     attack_remaining = attacker.remove_troops(attacker_loss)
                     defender_remaining = target.remove_troops(defender_loss)
-                    logger.debug(
-                        f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
-                    )
-                    # time.sleep(PAUSE_BTW_ACTIONS)
+                logger.debug(
+                    f"Remaining: A: {attack_remaining}, D: {defender_remaining}"
+                )
+                # time.sleep(PAUSE_BTW_ACTIONS)
 
             else:
                 attacker_loss, defender_loss = attack_once(
@@ -365,9 +365,7 @@ class Game:
                 # time.sleep(PAUSE_BTW_ACTIONS)
 
             if defender_remaining == 0:
-                logger.debug(
-                    f"Territory got conquered, transferring troops and ownership"
-                )
+                logger.debug(f"{player.name} conquered {target.name}")
                 # Update ownership
                 target_player = self.get_player_by_name(target.occupying_player_name)
                 target_player.remove_territory(target)
@@ -434,9 +432,11 @@ class Game:
         pass
 
     def is_game_over(self):
-        return (
-            len(self.remaining_players) == 1
-        )  # Game is over when only one player remains
+        is_over = len(self.remaining_players) == 1
+        if is_over:
+            logger.debug(f"{self.remaining_players[0].name} Won")
+            return True
+        return False
 
     def play_turns(self):
         """
@@ -499,7 +499,7 @@ class Game:
             ]
             self.turn_number += 1
 
-        print(f"Player: {remaining_players[0].name} Won!!")
+        logger.debug(f"Player: {remaining_players[0].name} Won!!")
 
     def get_remaining_players(self):
         return [player for player in self.players if not player.is_dead]
@@ -513,8 +513,6 @@ class Game:
             - randomly assigns territories to each player with 1 troop
             - randomly assigns the remaining troops to each territory
         """
-        logger.debug(f"Called")
-
         # Need to reset the original list order for seeding & deterministic behaviour
         player_list = [self.get_player_by_id(i) for i in range(len(self.players))]
         self.players = player_list
@@ -553,7 +551,7 @@ class Game:
                 t.add_troops(1)
                 p_remaining_troops -= 1
 
-    def __str__(self):
+    def __repr__(self):
         result = ""
         for territory in self.game_map.territories:
             terr_rep = f"\n{territory.name}|{territory.id_} - {territory.occupying_player_name} - {territory.troops} troops."

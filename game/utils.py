@@ -21,11 +21,7 @@ def attack_once(player, attacker, target, attack_dice_nb, true_random):
     Returns:
         _type_: _description_
     """
-    logger.debug(
-        f"{player.name} Attacking from {attacker.name} to {target.name} with {attack_dice_nb} dices."
-    )
     attacker_loss, defender_loss = roll_dices(
         player, attacker, target, attack_dice_nb, true_random
     )
-    logger.debug(f"Attacker lost {attacker_loss}, Defender lost {defender_loss}")
     return attacker_loss, defender_loss

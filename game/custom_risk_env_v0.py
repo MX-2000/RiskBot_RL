@@ -64,8 +64,6 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
 
-        # logger.debug(self.game)
-
     def flatten_observation_space(self):
         flattened_space_shape = self._calculate_flattened_space_shape()
         return gym.spaces.Box(
@@ -166,7 +164,6 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         return {}
 
     def reset(self, seed=None, options=None):
-        logger.debug("*********************RESET********************")
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
 
@@ -181,7 +178,6 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             obs = self._get_obs()
             return obs, self._get_info()
 
-        logger.debug("RL Player turn")
         # It's back to the agent_player's turn again
         if self.game.game_phase == "DRAFT":
             troops_to_deploy = self.game.get_deployment_troops(self.game.active_player)
@@ -214,7 +210,9 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             # We choose the attacking territory
             attacker = self.game.active_player.attack_choose_attack_territory()
             self.game.attacking_territory = attacker
-            logger.debug(f"RL player chose {attacker.name} as attacker territory.")
+            logger.debug(
+                f"{self.game.active_player.name} attacking from {attacker.name}"
+            )
 
         else:
             raise f"Incorrect phase: {self.game.game_phase}"
@@ -225,6 +223,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         if self.render_mode == "human":
             self._render_frame()
 
+        logger.debug(self.game)
         return observation, info
 
     def get_masked_action_space(self):
@@ -307,12 +306,6 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         """
 
         masked_action_space = self.get_masked_action_space()
-
-        logger.debug(
-            f"{[f'{t.name}, {t.id_}' for t in self.game.game_map.territories]}"
-        )
-        logger.debug(f"Action: {action}")
-        logger.debug(f"Valid actions: {masked_action_space}")
 
         if action not in masked_action_space:
             raise ValueError(f"Invalid action {action} selected.")

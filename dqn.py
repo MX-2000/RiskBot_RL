@@ -41,7 +41,8 @@ class DQN:
 
     epsilon_start = 1
     epsilon_end = 0.1
-    epsilon_decay = 0.99
+    epsilon_decay = 0.0001
+    start_decay = 200  # at which episode do we start decaying epsilon
 
     def __init__(self, env: gym.Env) -> None:
         self.env = env
@@ -74,7 +75,7 @@ class DQN:
     def select_action(self, state, episode_nb):
         valid_actions = self.env.unwrapped.get_masked_action_space()
         logger.debug(f"Valid actions: {valid_actions}")
-        if episode_nb < 200:
+        if episode_nb < self.start_decay:
             action = np.random.choice(valid_actions)
         elif np.random.random() < self.epsilon:
             action = np.random.choice(valid_actions)
@@ -91,14 +92,23 @@ class DQN:
 
         return action
 
+    def decay_epsilon(self, episode_nb):
+        return self.epsilon_end + (self.epsilon_start - self.epsilon_end) * (
+            1
+            - np.log(1 + self.epsilon_decay * episode_nb)
+            / np.log(1 + self.epsilon_decay * self.tot_episodes)
+        )
+
     def train_network(self, episode_nb):
-        if len(self.memory) > self.mini_batch_size and episode_nb > 200:
+        if len(self.memory) > self.mini_batch_size and episode_nb > self.start_decay:
 
             mini_batch = self.memory.sample(self.mini_batch_size)
             self.optimize(mini_batch)
 
             # Decay epsilon
-            new_e = max(self.epsilon * self.epsilon_decay, self.epsilon_end)
+            # new_e = max(self.epsilon * self.epsilon_decay, self.epsilon_end)
+            new_e = self.decay_epsilon(episode_nb)
+            # new_e = self.epsilon_start / (1 - self.epsilon_decay * episode_nb)
             self.epsilon = new_e
             self.epsilon_history.append(self.epsilon)
 
@@ -110,6 +120,8 @@ class DQN:
                 self.updateCounter = 0
 
     def train(self, episodes=500):
+
+        self.tot_episodes = episodes
         # List to keep track of epsilon decay
         self.epsilon_history = []
         self.updateCounter = 0
@@ -158,7 +170,7 @@ class DQN:
         env.close()
 
         # Save policy
-        self.target_dqn.save("warehouse_dqn.keras")
+        self.target_dqn.save("RiskDQN.keras")
 
         # Create new graph
         plt.figure(1)
@@ -171,7 +183,7 @@ class DQN:
         plt.plot(self.epsilon_history)
 
         # Save plots
-        plt.savefig("warehouse_dqn.png")
+        plt.savefig("RiskDQN.png")
 
     def optimize(self, mini_batch):
 

@@ -57,7 +57,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                     num_territories * num_territories
                 ),  # Flattened adjacency matrix
                 "troops_to_deploy": spaces.Box(
-                    low=0, high=np.inf, shape=(1,), dtype=np.int128
+                    low=0, high=np.inf, shape=(1,), dtype=np.int64
                 ),
             }
         )
@@ -155,6 +155,10 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
 
         attacking_territory = self.game.attacking_territory.id_
 
+        troops_to_deploy = 0
+        if self.game.game_phase == "DRAFT":
+            troops_to_deploy = 0
+
         return {
             "num_troops": np.array(num_troops),
             "player_ids_territory": np.array(player_ids_territory),
@@ -162,6 +166,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             "player": player,
             "attacking_territory": attacking_territory,
             "connexions": np.array(connexions),
+            "troops_to_deploy": troops_to_deploy,
         }
 
     def _get_info(self):

@@ -262,4 +262,4 @@ if __name__ == "__main__":
 
     env = gym.make("game/RiskEnv-V0", game=game, agent_player=p2, render_mode=None)
     RL_bot = DQN(env)
-    RL_bot.train(5000)
+    RL_bot.train(100)

@@ -112,6 +112,9 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         # That one we keep label encoded
         flat_num_troops = obs["num_troops"]
 
+        # Same here, leave the scalar as it is
+        troops_to_deploy = obs["troops_to_deploy"]
+
         flattened_obs = np.concatenate(
             [
                 flat_player_id_terr,
@@ -120,6 +123,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 flat_att_terr,
                 flat_conn,
                 flat_num_troops,
+                troops_to_deploy,
             ]
         )
         return flattened_obs

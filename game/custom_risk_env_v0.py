@@ -23,6 +23,7 @@ from game.player import Player, Player_Random
 
 LOSE_GAME_REWARD = -1e10
 WIN_GAME_REWARD = 1e10
+TERRITORY_GAIN_REWARD = 1e9
 
 
 class RiskEnv_Choice_is_attack_territory(gym.Env):
@@ -305,6 +306,10 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             - Running the beginning of the agent turn (choosing attacker)
         """
 
+        initial_player_terr_numbers = len(
+            self.game.active_player.controlled_territories
+        )
+
         masked_action_space = self.get_masked_action_space()
 
         if action not in masked_action_space:
@@ -330,6 +335,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             "attack_dice_nb": dice_nb,
         }
         self.game.after_attack(attack_info=attack_info)
+        # TODO add reward if territory conquered ?
 
         if self.game.is_game_over():
             if self.game.remaining_players[0] == self.agent_player:
@@ -347,6 +353,11 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         ):
             attacker = self.game.active_player.attack_choose_attack_territory()
             self.game.attacking_territory = attacker
+
+            current_terr_nb = len(self.game.active_player.controlled_territories)
+            reward = (
+                current_terr_nb - initial_player_terr_numbers
+            ) * TERRITORY_GAIN_REWARD
             return self._get_obs(), reward, False, False, self._get_info()
 
         # Else we check if game is over & we move on to the next phase
@@ -366,6 +377,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         self.game.next_turn()
 
         terminated = self.play_other_player_turn()
+
         if terminated:
             if self.game.remaining_players[0] == self.agent_player:
                 reward = WIN_GAME_REWARD
@@ -382,6 +394,9 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 reward = LOSE_GAME_REWARD
             obs = self._get_obs()
             return obs, reward, terminated, False, self._get_info()
+
+        current_terr_nb = len(self.game.active_player.controlled_territories)
+        reward = (current_terr_nb - initial_player_terr_numbers) * TERRITORY_GAIN_REWARD
 
         # It should be now back up to the agent making a new choice
         return self._get_obs(), reward, False, False, self._get_info()

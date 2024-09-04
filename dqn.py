@@ -44,7 +44,7 @@ class DQN:
     epsilon_start = 1
     epsilon_end = 0.1
     epsilon_decay = 0.0001
-    start_decay = 200  # at which episode do we start decaying epsilon
+    start_decay = 1000  # at which episode do we start decaying epsilon
 
     def __init__(self, env: gym.Env) -> None:
         self.env = env
@@ -262,4 +262,4 @@ if __name__ == "__main__":
 
     env = gym.make("game/RiskEnv-V0", game=game, agent_player=p2, render_mode=None)
     RL_bot = DQN(env)
-    RL_bot.train(1000)
+    RL_bot.train(5000)

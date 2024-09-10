@@ -123,7 +123,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 flat_att_terr,
                 flat_conn,
                 flat_num_troops,
-                troops_to_deploy,
+                [troops_to_deploy],
             ]
         )
         return flattened_obs
@@ -202,7 +202,11 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 deploying = self.game.active_player.draft_choose_troops_to_deploy(
                     troops_to_deploy
                 )
+                # TODO here return a choice to deploy troops on which territory
+                # This should end the reset()
                 territory = self.game.active_player.draft_choose_territory_to_deploy()
+                # return here obs etc
+
                 territory.add_troops(deploying)
                 troops_to_deploy -= deploying
                 logger.debug(
@@ -246,6 +250,7 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
         Currently, only choosing the attack territory.
         Available actions is the list of territories that are adjacent to the attacking territory AND are not owned by the player
         """
+        # TODO will need to differentiate based on choice phase (deploy or attack etc)
         attacking_player = self.agent_player
         attacker = self.game.attacking_territory
 
@@ -284,6 +289,8 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
                 deploying = self.game.active_player.draft_choose_troops_to_deploy(
                     troops_to_deploy
                 )
+
+                # TODO break here in two parts: play_from_agent_player_draft and play_from_agent_player_deployed
                 territory = self.game.active_player.draft_choose_territory_to_deploy()
                 territory.add_troops(deploying)
                 troops_to_deploy -= deploying
@@ -317,6 +324,11 @@ class RiskEnv_Choice_is_attack_territory(gym.Env):
             - Running other non agent turns
             - Running the beginning of the agent turn (choosing attacker)
         """
+
+        # Differentiate the phases: DRAFT or ATTACK
+
+        # if draft: play_from_agent_player_deployed
+        # elif attack: what we already have
 
         initial_player_terr_numbers = len(
             self.game.active_player.controlled_territories
